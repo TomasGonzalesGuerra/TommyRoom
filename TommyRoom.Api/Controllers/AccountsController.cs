@@ -104,7 +104,8 @@ public class AccountsController(DataContext datacontext, IUserHelper userHelper,
     public async Task<ActionResult<List<User>>> GetAllUsers()
     {
         if (_dataContext.Users == null) return NotFound("Entidad NO Encontrada");
-        List<User> allUsers = await _dataContext.Users.Where(u => u.UserType == UserType.User).OrderBy(u => u.FullName).ToListAsync();
+        //List<User> allUsers = await _dataContext.Users.Where(u => u.UserType == UserType.User).OrderBy(u => u.FullName).ToListAsync();
+        List<User> allUsers = await _dataContext.Users.OrderBy(u => u.FullName).ToListAsync();
         if (allUsers == null) return NotFound("Usuarios NO Encontrados");
         return Ok(allUsers);
     }
