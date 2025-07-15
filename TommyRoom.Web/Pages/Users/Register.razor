@@ -27,7 +27,7 @@
 
             <MudItem xs="12" sm="6">
                 <MudItem xs="12" sm="6">
-                    <InputImg Label=Image ImageSelected="ImageSelected" ImageURL="@imageUrl" />
+                    <InputImg Label="Foto" ImageSelected="ImageSelected" ImageURL="@imageUrl" />
                 </MudItem>
             </MudItem>
 
@@ -66,14 +66,26 @@
 @code{
     private UserDTO userDTO = new();
     private bool loading;
-    private string? imageUrl;
+    private string imageUrl = string.Empty;
     private UserType _enumValue { get; set; } = UserType.User;
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
 
 
-    private void ImageSelected(string imageBase64)
+    protected override void OnInitialized()
     {
-        userDTO.Photo = imageBase64;
-        imageUrl = null;
+        base.OnInitialized();
+
+        if(!string.IsNullOrEmpty(userDTO.Photo))
+        {
+            imageUrl = userDTO.Photo;
+            userDTO.Photo = string.Empty;
+        }
+    }
+
+    private void ImageSelected(string imagenBase64)
+    {
+        userDTO.Photo = imagenBase64;
+        imageUrl = string.Empty;
     }
 
     private void ReturnAction() => _navigationManager.NavigateTo("/");
@@ -92,7 +104,7 @@
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
-            
+
             if (message!.Contains("DuplicateUserName"))
             {
                 _snackbar.Add("EmailAlreadyExists", Severity.Error);
@@ -107,17 +119,14 @@
         _navigationManager.NavigateTo("/");
     }
 
+
+
     private bool ValidateForm()
     {
         var hasErrors = false;
         if (string.IsNullOrEmpty(userDTO.FullName))
         {
             _snackbar.Add(string.Format("RequiredField", string.Format("FullName")), Severity.Error);
-            hasErrors = true;
-        }
-        if (string.IsNullOrEmpty(userDTO.PhoneNumber))
-        {
-            _snackbar.Add(string.Format("RequiredField", string.Format("PhoneNumber")), Severity.Error);
             hasErrors = true;
         }
         if (string.IsNullOrEmpty(userDTO.Email))
