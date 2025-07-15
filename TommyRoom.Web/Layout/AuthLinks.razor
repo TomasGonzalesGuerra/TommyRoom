@@ -5,15 +5,14 @@
 
 <AuthorizeView>
     <Authorized>
-        <MudText Style="margin: auto;" Typo="Typo.body1" Align="Align.Center"> Hey! @userType</MudText>
+        <MudText Style="margin: auto;" Typo="Typo.body1" Align="Align.Center"> Hey! @FullName</MudText>
         
         @if (!string.IsNullOrEmpty(photoUser))
         {
             <MudAvatar Size="Size.Medium">
-                <MudImage Src="@photoUser" Style="cursor: pointer;"></MudImage>
+                <MudImage Src="@photoUser"></MudImage>
             </MudAvatar>
         }
-        <MudText> @userType </MudText>
 
         <MudMenu Dense Size="Size.Medium" Icon="@Icons.Material.Outlined.Settings" Color="Color.Inherit">
             <MudMenuItem OnClick="ShowModalLogOut" ForceLoad Icon="@Icons.Material.TwoTone.Logout" IconColor="Color.Error" Label="Sign Out" />
@@ -58,6 +57,7 @@
     private int BadgeContent;
     private string? userType;
     private string? photoUser;
+    private string? FullName;
     private List<string> UserNotifications = [];
 
 
@@ -66,10 +66,11 @@
         var authenticationState = await AuthenticationStateTask;
         var claims = authenticationState.User.Claims.ToList();
         var photoClaim = claims.FirstOrDefault(x => x.Type == "Photo");
-        var nameClaim = claims.FirstOrDefault(x => x.Type == "UserName");
+        var nameClaim = claims.FirstOrDefault(x => x.Type == "FullName");
         var userTypeClaim = claims.FirstOrDefault(x => x.Type == "UserType");
 
         if (photoClaim is not null) photoUser = photoClaim.Value;
+        if (nameClaim is not null) FullName = nameClaim.Value;
         if (userTypeClaim is not null) userType = userTypeClaim.ToString();
         
         // await LoadAsync();

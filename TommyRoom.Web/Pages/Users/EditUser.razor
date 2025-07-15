@@ -22,14 +22,13 @@
             <MudItem xs="12" sm="6">
                 <MudCardContent>
                     <MudTextField Label="FullName" @bind-Value="user.FullName" For="@(() => user.FullName)"></MudTextField>
-                    <MudTextField Label="PhoneNumber" @bind-Value="user.PhoneNumber" For="@(() => user.PhoneNumber)" InputType="InputType.Telephone"></MudTextField>
                     <MudTextField Label="Email" @bind-Value="user.Email" For="@(() => user.Email)" InputType="InputType.Email"></MudTextField>
                 </MudCardContent>
             </MudItem>
 
             <MudItem xs="12" sm="6">
                 <MudItem xs="12" sm="6">
-                    <InputImg Label=Image ImageSelected="ImageSelected" ImageURL="@imageUrl" />
+                    <InputImg ImageSelected="ImageSelected" ImageURL="@imageUrl" />
                 </MudItem>
             </MudItem>
 
@@ -135,11 +134,6 @@
         if (string.IsNullOrEmpty(user.FullName))
         {
             _snackbar.Add(string.Format("RequiredField", string.Format("FullName")), Severity.Error);
-            hasErrors = true;
-        }
-        if (string.IsNullOrEmpty(user.PhoneNumber))
-        {
-            _snackbar.Add(string.Format("RequiredField", string.Format("PhoneNumber")), Severity.Error);
             hasErrors = true;
         }
         if (string.IsNullOrEmpty(user.Email))

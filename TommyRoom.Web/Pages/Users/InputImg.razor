@@ -1,8 +1,12 @@
 ﻿<div>
-    <label>@Label</label>
-
     <div>
-        <InputFile OnChange="OnChange" accept=".jpg,.jpeg,.png" />
+        <MudFileUpload T="IBrowserFile" OnFilesChanged="OnChange">
+            <ActivatorContent>
+                <MudButton Color="Color.Info" StartIcon="@Icons.Material.Outlined.PhotoCamera">
+                    Fotico
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
     </div>
 </div>
 
@@ -11,7 +15,7 @@
     {
         <div>
             <div style="margin:  10px">
-                <img src="data:image/jpeg;base64, @imageBase64" style="width:400px" />
+                <img src="data:image/jpeg;base64, @imageBase64" style="height:200px" />
             </div>
         </div>
     }
@@ -19,7 +23,7 @@
     {
         <div>
             <div style="margin:  10px">
-                <img src="@ImageURL" style="width:400px" />
+                <img src="@ImageURL" style="height:200px" />
             </div>
         </div>
     }
@@ -28,11 +32,11 @@
 
 @code {
     [Parameter]
-    public string Label { get; set; } = "Imagen";
-    [Parameter]
     public string? ImageURL { get; set; }
+
     [Parameter]
     public EventCallback<string> ImageSelected { get; set; }
+
     private string? imageBase64;
     
     async Task OnChange(InputFileChangeEventArgs e)
