@@ -18,5 +18,5 @@ public class User : IdentityUser
     public UserType UserType { get; set; }
 
 
-    public ICollection<Reservation>? Reservations { get; set; }
+    public ICollection<Booking>? Bookings { get; set; }
 }

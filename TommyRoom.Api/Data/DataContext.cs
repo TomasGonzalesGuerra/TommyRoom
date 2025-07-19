@@ -7,20 +7,20 @@ namespace TommyRoom.Api.Data;
 public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<User>(options)
 {
     public DbSet<Room> Rooms { get; set; }
-    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Reservation>()
+        modelBuilder.Entity<Booking>()
             .HasOne(r => r.User)
-            .WithMany(u => u.Reservations)
+            .WithMany(u => u.Bookings)
             .HasForeignKey(r => r.UserId);
 
-        modelBuilder.Entity<Reservation>()
+        modelBuilder.Entity<Booking>()
             .HasOne(r => r.Room)
-            .WithMany(s => s.Reservations)
+            .WithMany(s => s.Bookings)
             .HasForeignKey(r => r.RoomId);
     }
 }
