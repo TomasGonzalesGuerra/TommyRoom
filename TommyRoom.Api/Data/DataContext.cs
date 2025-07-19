@@ -22,5 +22,10 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
             .HasOne(r => r.Room)
             .WithMany(s => s.Bookings)
             .HasForeignKey(r => r.RoomId);
+
+        modelBuilder.Entity<Room>()
+            .HasOne(r => r.User)
+            .WithMany(s => s.Rooms)
+            .HasForeignKey(r => r.UserId);
     }
 }

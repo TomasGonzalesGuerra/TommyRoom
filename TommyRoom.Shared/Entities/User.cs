@@ -19,4 +19,5 @@ public class User : IdentityUser
 
 
     public ICollection<Booking>? Bookings { get; set; }
+    public ICollection<Room>? Rooms { get; set; }
 }
