@@ -1,6 +1,6 @@
 ﻿namespace TommyRoom.Shared.DTOs
 {
-    public class RoomCreatedDTO
+    public class CreatedRoomDTO
     {
         public string? Name { get; set; }
         public string? Location { get; set; }

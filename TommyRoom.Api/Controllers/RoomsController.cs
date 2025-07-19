@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TommyRoom.Api.Data;
+using TommyRoom.Api.Helpers;
 using TommyRoom.Shared.DTOs;
 using TommyRoom.Shared.Entities;
 
@@ -12,9 +13,10 @@ namespace TommyRoom.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class RoomsController(DataContext dataContext) : ControllerBase
+public class RoomsController(DataContext dataContext, IUserHelper userHelper) : ControllerBase
 {
     private readonly DataContext _dataContext = dataContext;
+    private readonly IUserHelper _userHelper = userHelper;
 
 
     // GET: api/Rooms
@@ -57,10 +59,10 @@ public class RoomsController(DataContext dataContext) : ControllerBase
 
     // POST: api/Rooms
     [HttpPost]
-    public async Task<ActionResult<RoomCreatedDTO>> PostRoom(RoomCreatedDTO DTO)
+    public async Task<ActionResult<CreatedRoomDTO>> PostRoom(CreatedRoomDTO DTO)
     {
-        string? user = User.Identity!.Name;
-        if (user == null) return BadRequest("Logete Pz Wewasss...");
+        User userLog = await _userHelper.GetUserAsync(User.Identity!.Name!);
+        if (userLog == null) return Unauthorized("User not authenticated 😖 ...");
 
         Room room = new()
         {
@@ -71,6 +73,7 @@ public class RoomsController(DataContext dataContext) : ControllerBase
             PricePerNight = DTO.PricePerNight,
             Photo = string.Empty,
             IsAvailable = true,
+            OwnerId = userLog.Id,
         };
 
         _dataContext.Rooms.Add(room);

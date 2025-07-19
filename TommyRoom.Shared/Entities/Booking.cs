@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace TommyRoom.Shared.Entities;
+﻿namespace TommyRoom.Shared.Entities;
 
 public class Booking
 {
@@ -14,6 +12,5 @@ public class Booking
     public int RoomId { get; set; }
 
     public User? User { get; set; }
-    [Display(Name = "Huesped")]
-    public string? UserId { get; set; }
+    public string? GuestId { get; set; }
 }

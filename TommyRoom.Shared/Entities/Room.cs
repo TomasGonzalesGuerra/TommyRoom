@@ -15,8 +15,7 @@ public class Room
     public string? Photo { get; set; }
 
     public User? User { get; set; }
-    [Display(Name = "Propietario")]
-    public string? UserId { get; set; }
+    public string? OwnerId { get; set; }
 
     public ICollection<Booking>? Bookings { get; set; }
 }

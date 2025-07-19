@@ -1,29 +1,35 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TommyRoom.Api.Data;
+using TommyRoom.Api.Helpers;
+using TommyRoom.Shared.DTOs;
 using TommyRoom.Shared.Entities;
 
 namespace TommyRoom.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class BookingsController(DataContext dataContext) : ControllerBase
+    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class BookingsController(DataContext dataContext, IUserHelper userHelper) : ControllerBase
     {
         private readonly DataContext _dataContext = dataContext;
+        private readonly IUserHelper _userHelper = userHelper;
 
 
         // GET: api/Bookings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
-            return await _dataContext.Bookings.ToListAsync();
+            return await _dataContext.Bookings.OrderByDescending(b => b.EndTime < DateTime.UtcNow.ToLocalTime()).ToListAsync();
         }
 
         // GET: api/Bookings/#
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Booking>> GetBooking(int id)
+        [HttpGet("{BookingId:int}")]
+        public async Task<ActionResult<Booking>> GetBooking(int BookingId)
         {
-            var booking = await _dataContext.Bookings.FindAsync(id);
+            Booking? booking = await _dataContext.Bookings.FindAsync(BookingId);
 
             if (booking == null)
             {
@@ -34,7 +40,7 @@ namespace TommyRoom.Api.Controllers
         }
 
         // PUT: api/Bookings/#
-        [HttpPut("{id}")]
+        [HttpPut]
         public async Task<IActionResult> PutBooking(Booking booking)
         {
             _dataContext.Entry(booking).State = EntityState.Modified;
@@ -53,19 +59,37 @@ namespace TommyRoom.Api.Controllers
 
         // POST: api/Bookings
         [HttpPost]
-        public async Task<ActionResult<Booking>> PostBooking(Booking booking)
+        public async Task<ActionResult<CreatedBookingDTO>> PostBooking(CreatedBookingDTO DTO)
         {
+            User userLog = await _userHelper.GetUserAsync(User.Identity!.Name!);
+            if (userLog == null) return Unauthorized("User not authenticated 😖 ...");
+
+            Room? room = await _dataContext.Rooms.FindAsync(DTO.RoomId);
+            if (room == null) return Unauthorized("Habitación NoTa 😖 ...");
+
+            int days = (DTO.EndTime - DTO.StartTime).Days;
+            decimal totalPrice = days * room.PricePerNight;
+
+            Booking booking = new()
+            {
+                StartTime = DTO.StartTime,
+                EndTime = DTO.EndTime,
+                RoomId = DTO.RoomId,
+                TotalPrice = totalPrice,
+                GuestId = userLog.Id,
+            };
+
             _dataContext.Bookings.Add(booking);
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction("GetBooking", new { id = booking.Id }, booking);
+            return Ok();
         }
 
         // DELETE: api/Bookings/#
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBooking(int id)
+        [HttpDelete("{BookingId:int}")]
+        public async Task<IActionResult> DeleteBooking(int BookingId)
         {
-            var booking = await _dataContext.Bookings.FindAsync(id);
+            var booking = await _dataContext.Bookings.FindAsync(BookingId);
             if (booking == null)
             {
                 return NotFound();

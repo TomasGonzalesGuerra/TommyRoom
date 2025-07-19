@@ -92,10 +92,10 @@ public class SeedDb(DataContext datacontext, IUserHelper userHelper)
 
         if (!_datacontext.Rooms.Any())
         {
-            _datacontext.Rooms.Add(new() { UserId = user1!.Id, Name = "Sala de Juntas", Description = "Sala de juntas principal del edificio.", PricePerNight = 120.00m, Location = "Miraflores, Lima", Capacity = 10, Photo = "https://tse4.mm.bing.net/th/id/OIP.DQDYv5PmsVNIcfKaOci57QHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", IsAvailable = true, });
-            _datacontext.Rooms.Add(new() { UserId = user1!.Id, Name = "Ocean View Room", Description = "Sala de juntas principal del edificio.", PricePerNight = 225.00m, Location = "San Isidro, Lima", Capacity = 10, Photo = "https://th.bing.com/th/id/OIP.46lL6EcMcWm_KREifyWGUQHaE8?w=259&h=180&c=7&r=0&o=7&pid=1.7&rm=3", IsAvailable = true, });
-            _datacontext.Rooms.Add(new() { UserId = user2!.Id, Name = "City Loft", Description = "Modern loft in the heart of the city.", PricePerNight = 200.00m, Location = "La Molina, Lima", Capacity = 10, Photo = "https://th.bing.com/th/id/OIP.-3euBm1sKd1ef1jnURQGIwHaEr?w=262&h=180&c=7&r=0&o=7&pid=1.7&rm=3", IsAvailable = true, });
-            _datacontext.Rooms.Add(new() { UserId = user3!.Id, Name = "Nidito de Amor", Description = "Modern loft in the heart of the city.", PricePerNight = 55.00m, Location = "La Molina, Lima", Capacity = 10, Photo = "https://dbdzm869oupei.cloudfront.net/img/sticker/large/1736.jpg", IsAvailable = false, });
+            _datacontext.Rooms.Add(new() { OwnerId = user1!.Id, Name = "Sala de Juntas", Description = "Sala de juntas principal del edificio.", PricePerNight = 120.00m, Location = "Miraflores, Lima", Capacity = 10, Photo = "https://tse4.mm.bing.net/th/id/OIP.DQDYv5PmsVNIcfKaOci57QHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", IsAvailable = true, });
+            _datacontext.Rooms.Add(new() { OwnerId = user1!.Id, Name = "Ocean View Room", Description = "Sala de juntas principal del edificio.", PricePerNight = 225.00m, Location = "San Isidro, Lima", Capacity = 10, Photo = "https://th.bing.com/th/id/OIP.46lL6EcMcWm_KREifyWGUQHaE8?w=259&h=180&c=7&r=0&o=7&pid=1.7&rm=3", IsAvailable = true, });
+            _datacontext.Rooms.Add(new() { OwnerId = user2!.Id, Name = "City Loft", Description = "Modern loft in the heart of the city.", PricePerNight = 200.00m, Location = "La Molina, Lima", Capacity = 10, Photo = "https://th.bing.com/th/id/OIP.-3euBm1sKd1ef1jnURQGIwHaEr?w=262&h=180&c=7&r=0&o=7&pid=1.7&rm=3", IsAvailable = true, });
+            _datacontext.Rooms.Add(new() { OwnerId = user3!.Id, Name = "Nidito de Amor", Description = "Modern loft in the heart of the city.", PricePerNight = 55.00m, Location = "La Molina, Lima", Capacity = 10, Photo = "https://dbdzm869oupei.cloudfront.net/img/sticker/large/1736.jpg", IsAvailable = false, });
 
             await _datacontext.SaveChangesAsync();
         }
