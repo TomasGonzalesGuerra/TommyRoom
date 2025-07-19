@@ -2,6 +2,19 @@
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Rounded.Home"> Home </MudNavLink>
     <MudDivider />
 
+    <AuthorizeView Roles="SuperAdmin">
+        <Authorized>
+            <MudNavLink Href="/AdminDashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> Admin Dashboard </MudNavLink>
+            <MudDivider />
+            <MudNavLink Href="/Groups" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Category"> Grupos </MudNavLink>
+            <MudDivider />
+            <MudNavGroup Title="Ordenes">
+                <MudNavLink Href="/OrdersIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PointOfSale"> Pedidos </MudNavLink>
+            </MudNavGroup>
+            <MudDivider />
+        </Authorized>
+    </AuthorizeView>
+
     <AuthorizeView>
         <Authorized>
             <MudNavLink Href="/UserDashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> User Dashboard </MudNavLink>

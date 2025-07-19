@@ -1,13 +1,17 @@
 ﻿using Humanizer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TommyRoom.Api.Data;
+using TommyRoom.Shared.DTOs;
 using TommyRoom.Shared.Entities;
 
 namespace TommyRoom.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class RoomsController(DataContext dataContext) : ControllerBase
 {
     private readonly DataContext _dataContext = dataContext;
@@ -15,16 +19,20 @@ public class RoomsController(DataContext dataContext) : ControllerBase
 
     // GET: api/Rooms
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Room>>> GetRooms()
-    {
-        return await _dataContext.Rooms.ToListAsync();
-    }
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<Room>>> GetRooms() => await _dataContext.Rooms.ToListAsync();
+
+    // GET: api/Rooms/OnlyAvilable
+    [HttpGet("OnlyAvilable")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<Room>>> GetOnlyAvilableRooms() => await _dataContext.Rooms.Where(r => r.IsAvailable == true).ToListAsync();
 
     // GET: api/Rooms/#
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Room>> GetRoom(int id)
+    [HttpGet("{RoomId:int}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<Room>> GetRoom(int RoomId)
     {
-        Room? room = await _dataContext.Rooms.FindAsync(id);
+        Room? room = await _dataContext.Rooms.Include(r => r.Bookings).FirstOrDefaultAsync(r => r.Id == RoomId);
         if (room == null) return NotFound();
         return room;
     }
@@ -49,20 +57,34 @@ public class RoomsController(DataContext dataContext) : ControllerBase
 
     // POST: api/Rooms
     [HttpPost]
-    public async Task<ActionResult<Room>> PostRoom(Room room)
+    public async Task<ActionResult<RoomCreatedDTO>> PostRoom(RoomCreatedDTO DTO)
     {
+        string? user = User.Identity!.Name;
+        if (user == null) return BadRequest("Logete Pz Wewasss...");
+
+        Room room = new()
+        {
+            Name = DTO.Name,
+            Location = DTO.Location,
+            Description = DTO.Description,
+            Capacity = DTO.Capacity,
+            PricePerNight = DTO.PricePerNight,
+            Photo = string.Empty,
+            IsAvailable = true,
+        };
+
         _dataContext.Rooms.Add(room);
         await _dataContext.SaveChangesAsync();
 
-        return Ok(room);
+        return Ok();
     }
 
     // DELETE: api/Rooms/#
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteRoom(int id)
+    [HttpDelete("{RoomId:int}")]
+    public async Task<IActionResult> DeleteRoom(int RoomId)
     {
-        Room? room = await _dataContext.Rooms.FindAsync(id);
-        if (room == null) return NotFound();
+        Room? room = await _dataContext.Rooms.FindAsync(RoomId);
+        if (room == null) return BadRequest("Tabla NO Encontrada");
 
         _dataContext.Rooms.Remove(room);
         await _dataContext.SaveChangesAsync();
