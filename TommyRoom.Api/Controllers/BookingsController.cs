@@ -87,8 +87,8 @@ namespace TommyRoom.Api.Controllers
 
             Booking booking = new()
             {
-                StartTime = DTO.StartTime,
-                EndTime = DTO.EndTime,
+                StartTime = DTO.StartTime.ToUniversalTime(),
+                EndTime = DTO.EndTime.ToUniversalTime(),
                 RoomId = DTO.RoomId,
                 TotalPrice = totalPrice,
                 GuestId = userLog.Id,

@@ -14,12 +14,12 @@
     <MudPaper Class="pa-4">
         <MudImage Src="https://th.bing.com/th/id/OIG4.7UF2xD7d4zNIQTKR5bfn?pid=ImgGn" Alt="No Friends" Style="width: auto; height: 60vh; object-fit: cover;" />
 
-        <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Error"> Sin Amigos ??? </MudText>
+        <MudText Typo="Typo.h6" Color="Color.Error"> Sin Amigos ??? </MudText>
     </MudPaper>
 }
 else
 {
-    <MudTable Items="@AllRooms" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
+    <MudTable Items="@AllRooms" Bordered="true" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
         <ToolBarContent>
             <MudText Typo="Typo.h4"> Todas la Abitaciones </MudText>
             <MudSpacer />
@@ -29,7 +29,7 @@ else
         </ToolBarContent>
 
         <HeaderContent>
-            <MudTh> Foto </MudTh>
+            <MudTh> Habitación </MudTh>
             <MudTh> Propietario </MudTh>
             <MudTh> Habitación </MudTh>
             <MudTh> Disponible </MudTh>
@@ -38,21 +38,32 @@ else
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Foto">@context.Name</MudTd>
-            <MudTd DataLabel="Foto">@context.User!.FullName</MudTd>
+            <MudTd DataLabel="Habitación">
+                <MudStack>
+                    <MudAvatar Size="Size.Medium"><MudImage Src="@context.Photo"></MudImage></MudAvatar>
+                    <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Name </MudText>
+                </MudStack>
+            </MudTd>
+
+            <MudTd DataLabel="Propietario">
+                <MudStack>
+                    <MudAvatar Size="Size.Medium"><MudImage Src="@context.User!.Photo"></MudImage></MudAvatar>
+                    <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.User!.FullName </MudText>
+                </MudStack>
+            </MudTd>
 
             <MudTd DataLabel="Habitación">
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Location </MudText>
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Capacity </MudText>
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.PricePerNight </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Location </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Capacity </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.PricePerNight </MudText>
             </MudTd>
             
             <MudTd DataLabel="Disponible">
-                <MudText Typo="Typo.body1" Align="Align.Center" Color="@(context.IsAvailable ? Color.Success : Color.Error )"> @(context.IsAvailable ? "Sip" : "Nop") </MudText>
+                <MudText Typo="Typo.body1" Color="@(context.IsAvailable ? Color.Success : Color.Error )"> @(context.IsAvailable ? "Sip" : "Nop") </MudText>
             </MudTd>
 
             <MudTd DataLabel="Reservas">
-                <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Inherit"> @context.Bookings!.Count </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Inherit"> @context.Bookings!.Count </MudText>
             </MudTd>
 
             <MudTd DataLabel="Acciones">

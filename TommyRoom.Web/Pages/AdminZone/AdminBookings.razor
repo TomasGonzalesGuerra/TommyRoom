@@ -14,12 +14,12 @@
     <MudPaper Class="pa-4">
         <MudImage Src="https://th.bing.com/th/id/OIG4.7UF2xD7d4zNIQTKR5bfn?pid=ImgGn" Alt="No Friends" Style="width: auto; height: 60vh; object-fit: cover;" />
 
-        <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Error"> Sin Amigos ??? </MudText>
+        <MudText Typo="Typo.h5" Color="Color.Error"> Sin Amigos ??? </MudText>
     </MudPaper>
 }
 else
 {
-    <MudTable Items="@AllBookings" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
+    <MudTable Items="@AllBookings" Bordered="true" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
         <ToolBarContent>
             <MudText Typo="Typo.h4"> Las Reservaciones </MudText>
             <MudSpacer />
@@ -38,26 +38,37 @@ else
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Habitación">@context.Room!.Name</MudTd>
+            <MudTd DataLabel="Habitación">
+                <MudStack>
+                    <MudAvatar Size="Size.Medium"><MudImage Src="@context.Room!.Photo"></MudImage></MudAvatar>
+                    <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Room!.Name </MudText>
+                </MudStack>
+            </MudTd>
 
             <MudTd DataLabel="Inicio - Final">
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.StartTime - @context.EndTime </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Primary"> @context.StartTime.ToLocalTime().ToString("dd/MM/yyyy") - @context.EndTime.ToLocalTime().ToString("dd/MM/yyyy") </MudText>
             </MudTd>
 
             <MudTd DataLabel="Precio x Noche">
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Room!.PricePerNight </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Room!.PricePerNight </MudText>
             </MudTd>
 
             <MudTd DataLabel="Total a Pagar">
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.TotalPrice </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.TotalPrice </MudText>
             </MudTd>
 
             <MudTd DataLabel="Propietario">
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Room!.User!.FullName </MudText>
+                <MudStack>
+                    <MudAvatar Size="Size.Medium"><MudImage Src="@context.Room!.User!.Photo"></MudImage></MudAvatar>
+                    <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Room!.User!.FullName </MudText>
+                </MudStack>
             </MudTd>
 
             <MudTd DataLabel="Húesped">
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.User!.FullName </MudText>
+                <MudStack>
+                    <MudAvatar Size="Size.Medium"><MudImage Src="@context.User!.Photo"></MudImage></MudAvatar>
+                    <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.User!.FullName </MudText>
+                </MudStack>
             </MudTd>
 
             <MudTd DataLabel="Acciones">

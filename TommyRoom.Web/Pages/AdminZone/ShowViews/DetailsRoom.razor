@@ -4,7 +4,7 @@
 
 <PageTitle> Details Room </PageTitle>
 
-<MudDialog style="width: 75vw; min-height: 85vh;">
+<MudDialog style="min-width: 75vw; min-height: 85vh;">
     <DialogContent>
         <MudStack>
             <MudItem>
@@ -35,7 +35,7 @@
                     <MudPaper Class="pa-4">
                         <MudImage Src="https://th.bing.com/th/id/OIG4.7UF2xD7d4zNIQTKR5bfn?pid=ImgGn" Alt="No Friends" Style="width: auto; height: 60vh; object-fit: cover;" />
 
-                        <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Error"> Sin Amigos ??? </MudText>
+                        <MudText Typo="Typo.h6" Color="Color.Error"> Sin Amigos ??? </MudText>
                     </MudPaper>
                 }
                 else
@@ -46,25 +46,35 @@
                         </ToolBarContent>
 
                         <HeaderContent>
-                            <MudTh> Hinquilino </MudTh>
-                            <MudTh> Tiempo </MudTh>
+                            <MudTh> Húesped </MudTh>
+                            <MudTh> Inicio - Final </MudTh>
                             <MudTh> Precio x Noche </MudTh>
+                            <MudTh> #Días </MudTh>
                             <MudTh> Total a Pagar </MudTh>
                         </HeaderContent>
 
                         <RowTemplate>
-                            <MudTd DataLabel="Hinquilino">@context.User!.FullName</MudTd>
+                            <MudTd DataLabel="Húesped">
+                                <MudStack>
+                                    <MudAvatar Size="Size.Medium"><MudImage Src="@context.User!.Photo"></MudImage></MudAvatar>
+                                    <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.User!.FullName </MudText>
+                                </MudStack>
+                            </MudTd>
 
-                            <MudTd DataLabel="Tiempo">
-                                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Info"> @context.StartTime - @context.EndTime </MudText>
+                            <MudTd DataLabel="Inicio - Final">
+                                <MudText Typo="Typo.caption" Color="Color.Primary"> @context.StartTime.ToLocalTime().ToString("dd/MM/yyyy") - @context.EndTime.ToLocalTime().ToString("dd/MM/yyyy") </MudText>
                             </MudTd>
 
                             <MudTd DataLabel="Precio x Noche">
-                                <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Inherit"> @Room.PricePerNight </MudText>
+                                <MudText Typo="Typo.body1" Color="Color.Inherit"> @Room.PricePerNight </MudText>
+                            </MudTd>
+
+                            <MudTd DataLabel="#Días">
+                                <MudText Typo="Typo.caption" Color="Color.Inherit"> @((context.EndTime - @context.StartTime).Days) </MudText>
                             </MudTd>
 
                             <MudTd DataLabel="Total a Pagar">
-                                <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Inherit"> @context.TotalPrice </MudText>
+                                <MudText Typo="Typo.body1" Color="Color.Inherit"> @context.TotalPrice </MudText>
                             </MudTd>
                         </RowTemplate>
 
@@ -103,7 +113,7 @@
         {
             var responseHppt = await _repository.GetAsync<Room>($"api/Rooms/{RoomId}");
             Room = responseHppt.Response!;
-            BookingsByRomm = Room.Bookings!.ToList();
+            BookingsByRomm = Room.Bookings!.OrderBy(b => b.StartTime).ToList();
             OwnerName = Room.User!.FullName!;
             _loading = false;
         }

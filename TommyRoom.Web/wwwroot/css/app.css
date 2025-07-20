@@ -114,3 +114,7 @@ th.mud-table-cell, td.mud-table-cell {
 .mud-select .mud-select-input .mud-input-slot {
     height: auto;
 }
+
+.d-flex {
+    align-items: center;
+}
