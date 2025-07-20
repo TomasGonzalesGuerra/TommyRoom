@@ -14,6 +14,7 @@
                     <MudTextField @bind-Value="newRoom.Description" Label="Description" Variant="Variant.Outlined" Lines="4" />
                     <MudNumericField T="int" @bind-Value="newRoom.Capacity" Label="Capacity" Variant="Variant.Outlined" Required="true" />
                     <MudNumericField T="decimal" @bind-Value="newRoom.PricePerNight" Label="Price Per Night" Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentText="$" Required="true" />
+                    <InputImg ImageSelected="ImageSelected" ImageURL="@imageUrl" />
                 </MudItem>
             </MudForm>
         </MudItem>
@@ -31,7 +32,25 @@
     MudForm? form;
     private CreatedRoomDTO newRoom = new();
     bool _success;
+    private string imageUrl = string.Empty;
 
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (!string.IsNullOrEmpty(newRoom.Photo))
+        {
+            imageUrl = newRoom.Photo;
+            newRoom.Photo = string.Empty;
+        }
+    }
+
+    private void ImageSelected(string imagenBase64)
+    {
+        newRoom.Photo = imagenBase64;
+        imageUrl = string.Empty;
+    }
 
     private async Task OnValidSubmit()
     {

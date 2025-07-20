@@ -39,7 +39,7 @@
 
     private string? imageBase64;
     
-    async Task OnChange(InputFileChangeEventArgs e)
+    private async Task OnChange(InputFileChangeEventArgs e)
     {
         var imagenes = e.GetMultipleFiles();
 

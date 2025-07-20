@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +12,12 @@ namespace TommyRoom.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class RoomsController(DataContext dataContext, IUserHelper userHelper) : ControllerBase
+public class RoomsController(DataContext dataContext, IUserHelper userHelper,IFileStorage fileStorage) : ControllerBase
 {
     private readonly DataContext _dataContext = dataContext;
     private readonly IUserHelper _userHelper = userHelper;
+    private readonly IFileStorage _fileStorage = fileStorage;
+    private readonly string _container = "rooms";
 
 
     // GET: api/Rooms
@@ -66,6 +67,12 @@ public class RoomsController(DataContext dataContext, IUserHelper userHelper) : 
         User userLog = await _userHelper.GetUserAsync(User.Identity!.Name!);
         if (userLog == null) return Unauthorized("User not authenticated 😖 ...");
 
+        if (!string.IsNullOrEmpty(DTO.Photo))
+        {
+            var photoRoom = Convert.FromBase64String(DTO.Photo);
+            DTO.Photo = await _fileStorage.SaveFileAsync(photoRoom, ".jpg", _container);
+        }
+
         Room room = new()
         {
             Name = DTO.Name,
@@ -73,7 +80,7 @@ public class RoomsController(DataContext dataContext, IUserHelper userHelper) : 
             Description = DTO.Description,
             Capacity = DTO.Capacity,
             PricePerNight = DTO.PricePerNight,
-            Photo = "https://img.freepik.com/vector-premium/ilustracion-sala-reuniones-negocios_135595-39779.jpg",
+            Photo = DTO.Photo,
             IsAvailable = true,
             OwnerId = userLog.Id,
         };

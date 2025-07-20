@@ -17,13 +17,12 @@ namespace TommyRoom.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountsController(DataContext datacontext, IUserHelper userHelper, IConfiguration configuration, IFileStorage fileStorage, UserManager<User> userManager) : ControllerBase
+public class AccountsController(DataContext datacontext, IUserHelper userHelper, IConfiguration configuration, IFileStorage fileStorage) : ControllerBase
 {
     private readonly DataContext _dataContext = datacontext;
     private readonly IUserHelper _userHelper = userHelper;
     private readonly IConfiguration _configuration = configuration;
     private readonly IFileStorage _fileStorage = fileStorage;
-    private readonly UserManager<User> _userManager = userManager;
     private readonly string _container = "users";
 
     [HttpPost("CreateUser")]
@@ -100,7 +99,7 @@ public class AccountsController(DataContext datacontext, IUserHelper userHelper,
     }
 
     [HttpGet("AllUsers")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult<List<User>>> GetAllUsers()
     {
         if (_dataContext.Users == null) return NotFound("Entidad NO Encontrada");
