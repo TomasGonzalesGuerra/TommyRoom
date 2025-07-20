@@ -4,14 +4,13 @@
 
     <AuthorizeView Roles="SuperAdmin">
         <Authorized>
-            <MudNavLink Href="/AdminDashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> Admin Dashboard </MudNavLink>
-            <MudDivider />
-
             <MudNavLink Href="/Groups" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Category"> Reservas </MudNavLink>
             <MudDivider />
 
-            <MudNavGroup Title="Ordenes">
-                <MudNavLink Href="/OrdersIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PointOfSale"> Pedidos </MudNavLink>
+            <MudNavGroup Title="Zona Super Admin 😁">
+                <MudNavLink Href="/AdminRooms" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> Habitaciones</MudNavLink>
+                <MudDivider />
+                <MudNavLink Href="/AdminBookings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PointOfSale"> Reservas </MudNavLink>
             </MudNavGroup>
             <MudDivider />
         </Authorized>
@@ -19,10 +18,9 @@
 
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="/UserDashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> User Dashboard </MudNavLink>
-            <MudDivider />
-
-            <MudNavGroup Title="Ordenes">
+            <MudNavGroup Title="Zona Front ✌🏽">
+                <MudNavLink Href="/UserDashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> User Dashboard </MudNavLink>
+                <MudDivider />
                 <MudNavLink Href="/OrdersIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PointOfSale"> Pedidos </MudNavLink>
             </MudNavGroup>
             <MudDivider />

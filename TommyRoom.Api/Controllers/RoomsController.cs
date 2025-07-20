@@ -71,15 +71,21 @@ public class RoomsController(DataContext dataContext, IUserHelper userHelper) : 
             Description = DTO.Description,
             Capacity = DTO.Capacity,
             PricePerNight = DTO.PricePerNight,
-            Photo = string.Empty,
+            Photo = "https://img.freepik.com/vector-premium/ilustracion-sala-reuniones-negocios_135595-39779.jpg",
             IsAvailable = true,
             OwnerId = userLog.Id,
         };
 
-        _dataContext.Rooms.Add(room);
-        await _dataContext.SaveChangesAsync();
-
-        return Ok();
+        try
+        {
+            _dataContext.Rooms.Add(room);
+            await _dataContext.SaveChangesAsync();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // DELETE: api/Rooms/#

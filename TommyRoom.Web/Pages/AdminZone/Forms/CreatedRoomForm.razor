@@ -1,0 +1,60 @@
+﻿@inject ISnackbar _snackbar
+@inject IRepository _repository
+@inject SweetAlertService _sweetAlertService
+
+<PageTitle> Created Room Form </PageTitle>
+
+<MudDialog style="width: 50%; min-height: 16rem;">
+    <DialogContent>
+        <MudItem xs="12" sm="12">
+            <MudForm @ref="form" Model="newRoom" @bind-IsValid="@_success">
+                <MudItem>
+                    <MudTextField @bind-Value="newRoom.Name" Label="Name" Variant="Variant.Outlined" Required="true" />
+                    <MudTextField @bind-Value="newRoom.Location" Label="Location" Variant="Variant.Outlined" Required="true" />
+                    <MudTextField @bind-Value="newRoom.Description" Label="Description" Variant="Variant.Outlined" Lines="4" />
+                    <MudNumericField T="int" @bind-Value="newRoom.Capacity" Label="Capacity" Variant="Variant.Outlined" Required="true" />
+                    <MudNumericField T="decimal" @bind-Value="newRoom.PricePerNight" Label="Price Per Night" Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentText="$" Required="true" />
+                </MudItem>
+            </MudForm>
+        </MudItem>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="OnValidSubmit" Variant="Variant.Outlined" Color="Color.Success" Disabled="@(!_success)"> Crear Registro </MudButton>
+        <MudButton OnClick="Cancel" Variant="Variant.Outlined" Color="Color.Error"> Cancelar </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    MudForm? form;
+    private CreatedRoomDTO newRoom = new();
+    bool _success;
+
+
+    private async Task OnValidSubmit()
+    {
+        if (_success)
+        {
+            var httpResponse = await _repository.PostAsync("api/Rooms", newRoom);
+
+            if (httpResponse.Error)
+            {
+                var message = await httpResponse.GetErrorMessageAsync();
+                await _sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+
+            StateHasChanged();
+            _snackbar.Add("Se AGREGÓ el Registro", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    private void Cancel()
+    {
+        _snackbar.Add("NO se AGREGÓ Algún Registro", Severity.Info);
+        MudDialog.Cancel();
+    }
+}

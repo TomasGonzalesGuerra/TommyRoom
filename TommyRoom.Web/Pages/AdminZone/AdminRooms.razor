@@ -1,0 +1,106 @@
+﻿@page "/AdminRooms"
+@inject ISnackbar _snackbar
+@inject IRepository _repository
+@inject IDialogService _dialogService
+@inject NavigationManager _navigationManager
+@inject SweetAlertService _sweetAlertService
+@attribute [Authorize(Roles = "SuperAdmin")]
+
+<PageTitle> Admin Rooms 😁 </PageTitle>
+
+
+@if (AllRooms == null)
+{
+    <MudPaper Class="pa-4">
+        <MudImage Src="https://th.bing.com/th/id/OIG4.7UF2xD7d4zNIQTKR5bfn?pid=ImgGn" Alt="No Friends" Style="width: auto; height: 60vh; object-fit: cover;" />
+
+        <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Error"> Sin Amigos ??? </MudText>
+    </MudPaper>
+}
+else
+{
+    <MudTable Items="@AllRooms" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
+        <ToolBarContent>
+            <MudText Typo="Typo.h4"> Todas la Abitaciones </MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="SearchString" Placeholder="Buscar..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" />
+            <MudSpacer />
+            <MudButton OnClick="CreatedRoomAsync" EndIcon="@Icons.Material.Outlined.AddBox" Color="Color.Info" Size="Size.Large"> Habitación </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh> Foto </MudTh>
+            <MudTh> Habitación </MudTh>
+            <MudTh> Disponible </MudTh>
+            <MudTh> Acciones </MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Foto">@context.Name</MudTd>
+            <MudTd DataLabel="Habitación">
+                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Location </MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Capacity </MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.PricePerNight </MudText>
+            </MudTd>
+            <MudTd DataLabel="Disponible">
+                <MudText Typo="Typo.body1" Align="Align.Center" Color="@(context.IsAvailable ? Color.Success : Color.Error )"> @(context.IsAvailable ? "Sip" : "Nop") </MudText>
+            </MudTd>
+            <MudTd DataLabel="Acciones">
+                <MudIconButton OnClick="Saluda" Icon="@Icons.Material.Outlined.RemoveRedEye" Color="Color.Success" Size="Size.Medium" />
+                <MudIconButton OnClick="@(() => CreatedBookingAsync(context.Id))" Icon="@Icons.Material.Outlined.MoreTime" Color="Color.Success" Size="Size.Medium" />
+                <MudIconButton OnClick="Saluda" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Size="Size.Medium" />
+            </MudTd>
+        </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 5, 10, 15 }" />
+        </PagerContent>
+    </MudTable>
+}
+
+
+@code {
+    private List<Room> AllRooms = [];
+    private bool _loading = true;
+    private string SearchString = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            var responseHppt = await _repository.GetAsync<List<Room>>("api/Rooms");
+            AllRooms = responseHppt.Response!;
+            _loading = false;
+        }
+        catch (Exception ex)
+        {
+            await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+    }
+
+    private async Task CreatedRoomAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, BackgroundClass = "my-custom-class", MaxWidth = MaxWidth.ExtraLarge };
+        var dialog = await _dialogService.ShowAsync<CreatedRoomForm>("Nueva Habitación", options);
+
+        var result = await dialog.Result;
+        if (!result!.Canceled) await LoadAsync();
+    }
+
+    private async Task CreatedBookingAsync(int RoomId)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, BackgroundClass = "my-custom-class", MaxWidth = MaxWidth.ExtraLarge };
+        var parameters = new DialogParameters<CreatedBookingForm> { { x => x.RoomId, RoomId } };
+        var dialog = await _dialogService.ShowAsync<CreatedBookingForm>("Nueva Reservación", parameters, options);
+
+        var result = await dialog.Result;
+        if (!result!.Canceled) await LoadAsync();
+    }
+
+    private void Saluda()
+    {
+        Console.WriteLine("Hola, Saluda desde UserDashboard.razor");
+    }
+}

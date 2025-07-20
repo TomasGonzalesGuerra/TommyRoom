@@ -1,0 +1,69 @@
+﻿@inject ISnackbar _snackbar
+@inject IRepository _repository
+@inject SweetAlertService _sweetAlertService
+
+<PageTitle> Created Booking Form </PageTitle>
+
+<MudDialog style="width: 40rem; height: 16rem;">
+    <DialogContent>
+        <MudItem xs="12" sm="12">
+            <MudForm @ref="form" @bind-IsValid="@_success">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudDatePicker Label="Basic example" @bind-Date="_StartTime"
+                                       Required="true" RequiredError="El StartTime es Obligatorio!" />
+                        <br />
+                        <MudDatePicker Label="Basic example" @bind-Date="_EndTime"
+                                       Required="true" RequiredError="El EndTime es Obligatorio!" />
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudItem>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="OnValidSubmit" Variant="Variant.Outlined" Color="Color.Success" Disabled="@(!_success)"> Crear Registro </MudButton>
+        <MudButton OnClick="Cancel" Variant="Variant.Outlined" Color="Color.Error"> Cancelar </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] [EditorRequired] public int RoomId { get; set; }
+
+    MudForm? form;
+    private CreatedBookingDTO newBooking = new();
+    private DateTime? _StartTime = DateTime.Today.ToLocalTime();
+    private DateTime? _EndTime = DateTime.Today.ToLocalTime();
+    bool _success;
+
+
+    private async Task OnValidSubmit()
+    {
+        if (_success)
+        {
+            newBooking.StartTime = _StartTime!.Value;
+            newBooking.EndTime = _EndTime!.Value;
+            newBooking.RoomId = RoomId;
+
+            var httpResponse = await _repository.PostAsync("api/Bookings", newBooking);
+
+            if (httpResponse.Error)
+            {
+                var message = await httpResponse.GetErrorMessageAsync();
+                await _sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+
+            StateHasChanged();
+            _snackbar.Add("Se AGREGÓ el Registro", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    private void Cancel()
+    {
+        _snackbar.Add("NO se AGREGÓ Algún Registro", Severity.Info);
+        MudDialog.Cancel();
+    }
+}

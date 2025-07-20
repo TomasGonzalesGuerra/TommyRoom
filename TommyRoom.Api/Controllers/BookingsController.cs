@@ -22,7 +22,19 @@ namespace TommyRoom.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
-            return await _dataContext.Bookings.OrderByDescending(b => b.EndTime < DateTime.UtcNow.ToLocalTime()).ToListAsync();
+            try
+            {
+                return Ok(await _dataContext.Bookings
+                        .Include(b => b.User)
+                        .Include(b => b.Room).ThenInclude(r => r!.User)
+                        .OrderByDescending(b => b.EndTime)
+                        .ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         // GET: api/Bookings/#
@@ -59,8 +71,11 @@ namespace TommyRoom.Api.Controllers
 
         // POST: api/Bookings
         [HttpPost]
-        public async Task<ActionResult<CreatedBookingDTO>> PostBooking(CreatedBookingDTO DTO)
+        public async Task<ActionResult<CreatedBookingDTO>> PostBooking([FromBody] CreatedBookingDTO DTO)
         {
+            bool conflic = _dataContext.Bookings.Any(b => b.RoomId == DTO.RoomId && b.StartTime < DTO.EndTime && b.EndTime > DTO.StartTime);
+            if (conflic) return BadRequest("La Habitación ya está Reservada en esas Fechas 😖 ...");
+
             User userLog = await _userHelper.GetUserAsync(User.Identity!.Name!);
             if (userLog == null) return Unauthorized("User not authenticated 😖 ...");
 
@@ -79,10 +94,16 @@ namespace TommyRoom.Api.Controllers
                 GuestId = userLog.Id,
             };
 
-            _dataContext.Bookings.Add(booking);
-            await _dataContext.SaveChangesAsync();
-
-            return Ok();
+            try
+            {
+                _dataContext.Bookings.Add(booking);
+                await _dataContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/Bookings/#
