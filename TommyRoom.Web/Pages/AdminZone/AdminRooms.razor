@@ -30,23 +30,33 @@ else
 
         <HeaderContent>
             <MudTh> Foto </MudTh>
+            <MudTh> Propietario </MudTh>
             <MudTh> Habitación </MudTh>
             <MudTh> Disponible </MudTh>
+            <MudTh> Reservas </MudTh>
             <MudTh> Acciones </MudTh>
         </HeaderContent>
 
         <RowTemplate>
             <MudTd DataLabel="Foto">@context.Name</MudTd>
+            <MudTd DataLabel="Foto">@context.User!.FullName</MudTd>
+
             <MudTd DataLabel="Habitación">
                 <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Location </MudText>
                 <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.Capacity </MudText>
                 <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Primary"> @context.PricePerNight </MudText>
             </MudTd>
+            
             <MudTd DataLabel="Disponible">
                 <MudText Typo="Typo.body1" Align="Align.Center" Color="@(context.IsAvailable ? Color.Success : Color.Error )"> @(context.IsAvailable ? "Sip" : "Nop") </MudText>
             </MudTd>
+
+            <MudTd DataLabel="Reservas">
+                <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Inherit"> @context.Bookings!.Count </MudText>
+            </MudTd>
+
             <MudTd DataLabel="Acciones">
-                <MudIconButton OnClick="Saluda" Icon="@Icons.Material.Outlined.RemoveRedEye" Color="Color.Success" Size="Size.Medium" />
+                <MudIconButton OnClick="@(() => DetailsRoomAsync(context.Id))" Icon="@Icons.Material.Outlined.RemoveRedEye" Color="Color.Success" Size="Size.Medium" />
                 <MudIconButton OnClick="@(() => CreatedBookingAsync(context.Id))" Icon="@Icons.Material.Outlined.MoreTime" Color="Color.Success" Size="Size.Medium" />
                 <MudIconButton OnClick="Saluda" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Size="Size.Medium" />
             </MudTd>
@@ -87,6 +97,13 @@ else
 
         var result = await dialog.Result;
         if (!result!.Canceled) await LoadAsync();
+    }
+
+    private async Task DetailsRoomAsync(int RoomId)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, BackgroundClass = "my-custom-class", MaxWidth = MaxWidth.ExtraLarge };
+        var parameters = new DialogParameters<DetailsRoom> { { x => x.RoomId, RoomId } };
+        var dialog = await _dialogService.ShowAsync<DetailsRoom>(string.Empty, parameters, options);
     }
 
     private async Task CreatedBookingAsync(int RoomId)

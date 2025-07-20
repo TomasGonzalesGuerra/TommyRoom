@@ -1,0 +1,120 @@
+﻿@inject ISnackbar _snackbar
+@inject IRepository _repository
+@inject SweetAlertService _sweetAlertService
+
+<PageTitle> Details Room </PageTitle>
+
+<MudDialog style="width: 75vw; min-height: 85vh;">
+    <DialogContent>
+        <MudStack>
+            <MudItem>
+                <MudPaper Class="pa-4" Elevation="0">
+                    <MudGrid>
+                        <MudItem xs="12" md="6">
+                            <MudText Typo="Typo.h4">@Room.Name</MudText>
+                            <MudText Typo="Typo.subtitle1"><strong>Locación:</strong> @Room.Location </MudText>
+                            <MudText Typo="Typo.subtitle1">@Room.Description</MudText>
+                            <MudStack Row="true">
+                                <MudText Typo="Typo.subtitle1"><strong>Habilitada: </strong></MudText>
+                                <MudText Typo="Typo.subtitle1" Color="@(Room.IsAvailable? Color.Success: Color.Error)"> @(Room.IsAvailable ? "Sip" : "Nop") </MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudAvatar Size="Size.Large" Class="mb-2"><MudImage Src="@Room.Photo"></MudImage></MudAvatar>
+                            <MudText><strong>Capacity:</strong> @Room.Capacity</MudText>
+                            <MudText><strong>Price/Night:</strong> $@Room.PricePerNight</MudText>
+                            <MudText><strong>Owner:</strong> @OwnerName </MudText>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem>
+                @if (BookingsByRomm == null)
+                {
+                    <MudPaper Class="pa-4">
+                        <MudImage Src="https://th.bing.com/th/id/OIG4.7UF2xD7d4zNIQTKR5bfn?pid=ImgGn" Alt="No Friends" Style="width: auto; height: 60vh; object-fit: cover;" />
+
+                        <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Error"> Sin Amigos ??? </MudText>
+                    </MudPaper>
+                }
+                else
+                {
+                    <MudTable Items="@BookingsByRomm" Bordered="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Elevation="0">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6"> Bookings By Romm </MudText>
+                        </ToolBarContent>
+
+                        <HeaderContent>
+                            <MudTh> Hinquilino </MudTh>
+                            <MudTh> Tiempo </MudTh>
+                            <MudTh> Precio x Noche </MudTh>
+                            <MudTh> Total a Pagar </MudTh>
+                        </HeaderContent>
+
+                        <RowTemplate>
+                            <MudTd DataLabel="Hinquilino">@context.User!.FullName</MudTd>
+
+                            <MudTd DataLabel="Tiempo">
+                                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Info"> @context.StartTime - @context.EndTime </MudText>
+                            </MudTd>
+
+                            <MudTd DataLabel="Precio x Noche">
+                                <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Inherit"> @Room.PricePerNight </MudText>
+                            </MudTd>
+
+                            <MudTd DataLabel="Total a Pagar">
+                                <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Inherit"> @context.TotalPrice </MudText>
+                            </MudTd>
+                        </RowTemplate>
+
+                        <PagerContent>
+                            <MudTablePager PageSizeOptions="new int[] { 5, 10, 15 }" />
+                        </PagerContent>
+                    </MudTable>
+                }
+            </MudItem>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="OnValidSubmit" Variant="Variant.Outlined" EndIcon="@Icons.Material.Outlined.Check" Color="Color.Success"> Ok </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter][EditorRequired] public int RoomId { get; set; }
+
+    MudForm? form;
+    private Room Room = new();
+    private List<Booking> BookingsByRomm = [];
+    private bool _success;
+    private bool _loading = true;
+    private string OwnerName = string.Empty;
+    private string SearchString = string.Empty;
+
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            var responseHppt = await _repository.GetAsync<Room>($"api/Rooms/{RoomId}");
+            Room = responseHppt.Response!;
+            BookingsByRomm = Room.Bookings!.ToList();
+            OwnerName = Room.User!.FullName!;
+            _loading = false;
+        }
+        catch (Exception ex)
+        {
+            await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+    }
+
+    private void OnValidSubmit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

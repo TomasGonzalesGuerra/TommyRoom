@@ -21,22 +21,24 @@ public class RoomsController(DataContext dataContext, IUserHelper userHelper) : 
 
     // GET: api/Rooms
     [HttpGet]
-    [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<Room>>> GetRooms() => await _dataContext.Rooms.ToListAsync();
+    public async Task<ActionResult<IEnumerable<Room>>> GetRooms() => await _dataContext.Rooms.Include(r => r.User).Include(r => r.Bookings).ToListAsync();
 
     // GET: api/Rooms/OnlyAvilable
     [HttpGet("OnlyAvilable")]
-    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Room>>> GetOnlyAvilableRooms() => await _dataContext.Rooms.Where(r => r.IsAvailable == true).ToListAsync();
 
     // GET: api/Rooms/#
     [HttpGet("{RoomId:int}")]
-    [AllowAnonymous]
     public async Task<ActionResult<Room>> GetRoom(int RoomId)
     {
-        Room? room = await _dataContext.Rooms.Include(r => r.Bookings).FirstOrDefaultAsync(r => r.Id == RoomId);
+        Room? room = await _dataContext.Rooms
+            .Include(r => r.User)
+            .Include(r => r.Bookings!).ThenInclude(b => b.User)
+            .FirstOrDefaultAsync(r => r.Id == RoomId);
+
         if (room == null) return NotFound();
-        return room;
+
+        return Ok(room);
     }
 
     // PUT: api/Rooms/#
