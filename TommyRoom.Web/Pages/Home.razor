@@ -1,9 +1,62 @@
 ﻿@page "/"
 @inject IRepository _repository
+@inject NavigationManager _navigationManager
 @inject SweetAlertService _sweetAlertService
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+<MudGrid Spacing="3">
+    <MudItem xs="12"><MudText Typo="Typo.h4" Align="Align.Center">Biembenid@@ a Tommy Room</MudText></MudItem>
+
+    <MudItem xs="12">
+        <MudText Typo="Typo.body1" Align="Align.Center">
+            Usuarios del Sistema
+            <MudText Typo="Typo.body2">Recorre el Sistema como <span style="color: orange;">Anónimo</span> o <span style="color: green;">Logueate</span> 😁</MudText>
+        </MudText>
+    </MudItem>
+    @foreach (var item in AllUsers)
+    {    
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <MudCard Class="mx-auto" Style="border-radius: 1rem;" Elevation="2">
+                <MudCardContent>
+                    <MudStack Row="true" Spacing="3" AlignItems="AlignItems.Start">
+                        <MudAvatar Style="width:80px; height:80px;">
+                            <MudImage Src="@item.Photo" Style="cursor: pointer;"></MudImage>
+                        </MudAvatar>
+
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.h6">@item.FullName</MudText>
+                            <MudText Typo="Typo.body2" Color="@(item.UserType.Equals(UserType.SuperAdmin) ? Color.Success : Color.Primary)"> @item.UserType </MudText>
+                            <MudText Typo="Typo.body2"> 📍 Lima, Perú </MudText>
+                            <MudText Typo="Typo.body2"> 📧 @item.Email </MudText>
+                        </MudStack>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+
+@code {
+    private List<User> AllUsers = [];
+    private bool _loading = true;
+
+    
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            var responseHppt = await _repository.GetAsync<List<User>>("api/Accounts/AllUsers");
+            AllUsers = responseHppt.Response!;
+            _loading = false;
+        }
+        catch (Exception ex)
+        {
+            await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+    }
+}

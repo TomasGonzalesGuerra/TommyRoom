@@ -8,6 +8,7 @@ using MudBlazor.Services;
 using TommyRoom.Web;
 using TommyRoom.Web.Auth;
 using TommyRoom.Web.Repositories;
+using TommyRoom.Web.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -28,6 +29,7 @@ builder.Services.AddMudServices(config =>
 });
 builder.Services.AddSweetAlert2();
 builder.Services.AddScoped<IRepository, Repository>();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationProviderJWT>();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderJWT>(x => x.GetRequiredService<AuthenticationProviderJWT>());

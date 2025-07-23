@@ -1,0 +1,67 @@
+﻿@page "/UserDashboard"
+@inject ISnackbar _snackbar
+@inject IRepository _repository
+@inject ICartService _cartService
+@inject IDialogService _dialogService
+@inject NavigationManager _navigationManager
+@inject SweetAlertService _sweetAlertService
+
+<PageTitle>UserDashboard</PageTitle>
+
+<MudGrid Spacing="3">
+    @foreach (var room in AviableRooms)
+    {
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <MudCard Class="room-card">
+                <MudCardMedia Image="@room.Photo" Style="height:10rem;" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Class="room-title">@room.Name</MudText>
+                    <MudText Typo="Typo.body2" Class="room-desc">@room.Description</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="room-price">@($"S/.{room.PricePerNight:C} por noche")</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton OnClick="@(() => Saluda(room.Id))" StartIcon="@Icons.Material.Outlined.PointOfSale" Variant="Variant.Outlined" Color="Color.Success">
+                        Reservar
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+
+@code {
+    private List<Room> AviableRooms = [];
+    private bool _loading = true;
+    private string SearchString = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            var responseHppt = await _repository.GetAsync<List<Room>>("api/Rooms/OnlyAvilable");
+            AviableRooms = responseHppt.Response!;
+            _loading = false;
+        }
+        catch (Exception ex)
+        {
+            await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+    }
+
+    private async Task DetailsRoomAsync(int RoomId)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, BackgroundClass = "my-custom-class", MaxWidth = MaxWidth.ExtraLarge };
+        var parameters = new DialogParameters<DetailsRoom> { { x => x.RoomId, RoomId } };
+        var dialog = await _dialogService.ShowAsync<DetailsRoom>(string.Empty, parameters, options);
+    }
+
+    private void Saluda(int id)
+    {
+        CartItemDTO itemDTO = new() { RoomId = id, Quantity = 1 };
+        _cartService.AddItemAsync(itemDTO);
+        _snackbar.Add("Se Agregó Correctamente", Severity.Success, conf => { conf.Icon = Icons.Material.Outlined.Check; conf.IconColor = Color.Success; conf.IconSize = Size.Large; });
+    }
+}

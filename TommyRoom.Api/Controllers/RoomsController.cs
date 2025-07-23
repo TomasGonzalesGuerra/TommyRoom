@@ -26,6 +26,7 @@ public class RoomsController(DataContext dataContext, IUserHelper userHelper,IFi
 
     // GET: api/Rooms/OnlyAvilable
     [HttpGet("OnlyAvilable")]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Room>>> GetOnlyAvilableRooms() => await _dataContext.Rooms.Where(r => r.IsAvailable == true).ToListAsync();
 
     // GET: api/Rooms/#

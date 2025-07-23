@@ -16,9 +16,9 @@
         </Authorized>
     </AuthorizeView>
 
-    <AuthorizeView>
+    <AuthorizeView Roles="User">
         <Authorized>
-            <MudNavGroup Title="Zona Front ✌🏽">
+            <MudNavGroup Title="Zona User ✌🏽">
                 <MudNavLink Href="/UserDashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> User Dashboard </MudNavLink>
                 <MudDivider />
                 <MudNavLink Href="/OrdersIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PointOfSale"> Pedidos </MudNavLink>
@@ -26,6 +26,13 @@
             <MudDivider />
         </Authorized>
     </AuthorizeView>
+
+    <MudNavGroup Title="Zona Front ✌🏽">
+        <MudNavLink Href="/UserDashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser"> User Dashboard </MudNavLink>
+        <MudDivider />
+        <MudNavLink Href="/OrdersIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PointOfSale"> Pedidos </MudNavLink>
+    </MudNavGroup>
+    <MudDivider />
 
     <MudNavLink Href="/about" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Info"> About </MudNavLink>
 </MudNavMenu>
