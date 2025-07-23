@@ -58,10 +58,11 @@
         var dialog = await _dialogService.ShowAsync<DetailsRoom>(string.Empty, parameters, options);
     }
 
-    private void Saluda(int id)
+    private async Task Saluda(int id)
     {
         CartItemDTO itemDTO = new() { RoomId = id, Quantity = 1 };
-        _cartService.AddItemAsync(itemDTO);
+        await _cartService.AddItemAsync(itemDTO);
+        await _cartService.NotifyStateChangedAsync();
         _snackbar.Add("Se Agregó Correctamente", Severity.Success, conf => { conf.Icon = Icons.Material.Outlined.Check; conf.IconColor = Color.Success; conf.IconSize = Size.Large; });
     }
 }

@@ -1,11 +1,16 @@
 ﻿using TommyRoom.Shared.DTOs;
 
-namespace TommyRoom.Web.Services;
-
-public interface ICartService
+namespace TommyRoom.Web.Services
 {
-    Task AddItemAsync(CartItemDTO item);
-    Task ClearAsync();
-    Task LoadAsync();
-    Task RemoveItemAsync(CartItemDTO item);
+    public interface ICartService
+    {
+        event Func<Task>? OnChangeAsync;
+
+        int GetCount();
+        Task ClearAsync();
+        Task NotifyStateChangedAsync();
+        Task<List<CartItemDTO>> LoadAsync();
+        Task AddItemAsync(CartItemDTO item);
+        Task RemoveItemAsync(CartItemDTO item);
+    }
 }
