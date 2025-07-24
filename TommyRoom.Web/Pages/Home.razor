@@ -9,11 +9,9 @@
 <MudGrid Spacing="3">
     <MudItem xs="12"><MudText Typo="Typo.h4" Align="Align.Center">Biembenid@@ a Tommy Room</MudText></MudItem>
 
-    <MudItem xs="12">
-        <MudText Typo="Typo.body1" Align="Align.Center">
-            Usuarios del Sistema
-            <MudText Typo="Typo.body2">Recorre el Sistema como <span style="color: orange;">Anónimo</span> o <span style="color: green;">Logueate</span> 😁</MudText>
-        </MudText>
+    <MudItem xs="12" Class="d-flex justify-content-center gap-2">
+        <MudText Typo="Typo.subtitle1" Align="Align.Center">Usuarios del Sistema</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center">Recorre el Sistema como <span style="color: orange;">Anónimo</span> o <span style="color: green;">Logueate</span> 😁</MudText>
     </MudItem>
     @foreach (var item in AllUsers)
     {    

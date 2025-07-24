@@ -1,0 +1,124 @@
+﻿@page "/TemporalBooking"
+@implements IDisposable
+@inject ISnackbar _snackbar
+@inject IRepository _repository
+@inject ICartService _cartService
+@inject IDialogService _dialogService
+@inject SweetAlertService _sweetAlertService
+@inject NavigationManager _navigationManager
+
+<PageTitle>Temporal Booking</PageTitle>
+
+@if (cartItemDTOs == null)
+{
+    <MudPaper Class="pa-4">
+        <MudImage Src="https://th.bing.com/th/id/OIG4.7UF2xD7d4zNIQTKR5bfn?pid=ImgGn" Alt="No Friends" Style="width: auto; height: 60vh; object-fit: cover;" />
+
+        <MudText Typo="Typo.h6" Color="Color.Error"> Sin Amigos ??? </MudText>
+    </MudPaper>
+}
+else
+{
+    <MudTable Items="@cartItemDTOs" Bordered="true" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
+        <ToolBarContent><MudText Typo="Typo.h4">Tus Reservas</MudText></ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Habitación</MudTh>
+            <MudTh>Detalle</MudTh>
+            <MudTh>Inicio de Reserva</MudTh>
+            <MudTh>Fin de Reserva</MudTh>
+            <MudTh>Eliminar</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Habitación">
+                <MudStack>
+                    <MudAvatar Size="Size.Large"><MudImage Src="@context.Photo"></MudImage></MudAvatar>
+                    <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Name </MudText>
+                </MudStack>
+            </MudTd>
+
+            <MudTd DataLabel="Detalle">
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Description </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @context.Capacity </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit"> @($"{context.PricePerNight}/día") </MudText>
+            </MudTd>
+
+            <MudTd DataLabel="Inicio de Reserva">
+                <MudDatePicker @bind-Date="_startTime" Label="Inicio de Reserva" Required="true" RequiredError="El EndTime es Obligatorio!" />
+            </MudTd>
+
+            <MudTd DataLabel="Fin de Reserva">
+                <MudDatePicker @bind-Date="_endTime" Label="Fin de Reserva" Required="true" RequiredError="El EndTime es Obligatorio!" />
+            </MudTd>
+
+            <MudTd DataLabel="Eliminar">
+                <MudIconButton OnClick="@(() => BookinRoomAsync(context.RoomId))" Icon="@Icons.Material.Outlined.BookmarkAdded" Color="Color.Success" Size="Size.Medium" />
+                <MudIconButton OnClick="@(() => DeleteItemAsync(context))" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Size="Size.Medium" />
+            </MudTd>
+        </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 5, 10, 15 }" />
+        </PagerContent>
+    </MudTable>
+}
+
+
+@code {
+    private List<CartItemDTO> cartItemDTOs = [];
+    private bool _loading = true;
+    private DateTime? _startTime = DateTime.Today.ToLocalTime();
+    private DateTime? _endTime = DateTime.Today.ToLocalTime();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cartService.OnChangeAsync += LoadCartBookingsAsync;
+        await LoadCartBookingsAsync();
+        _loading = false;
+    }
+
+    private async Task BookinRoomAsync(int RoomId)
+    {
+        CreatedBookingDTO bookingDTO = new()
+        {
+            RoomId = RoomId,
+            StartTime = _startTime!.Value,
+            EndTime = _endTime!.Value
+        };
+
+        // var httpResponse = await _repository.PostAsync("api/Bookings", bookingDTO);
+
+        // if (httpResponse.Error)
+        // {
+        //     var message = await httpResponse.GetErrorMessageAsync();
+        //     await _sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+        //     return;
+        // }
+
+        Console.WriteLine($"Booking Created: {bookingDTO.RoomId} from {_startTime} to {_endTime}");
+        Console.WriteLine($"Booking Created: {bookingDTO.RoomId} from {_startTime.Value - _endTime.Value}");
+
+        await InvokeAsync(StateHasChanged);
+        _snackbar.Add("Se AGREGÓ el Registro", Severity.Success);
+    }
+
+    private async Task DeleteItemAsync(CartItemDTO itemDTO)
+    {
+        try
+        {
+            await _cartService.RemoveItemAsync(itemDTO!);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+
+        Console.WriteLine($"Item Deleted: {itemDTO.RoomId}");
+    }
+
+    private async Task LoadCartBookingsAsync() => cartItemDTOs = await _cartService.LoadAsync() ?? [];
+    public void Dispose() => _cartService.OnChangeAsync -= LoadCartBookingsAsync;
+}

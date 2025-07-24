@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @inject ICartService _cartService
 @inject IDialogService _dialogService
 @inject SweetAlertService _sweetAlertService
+@inject NavigationManager _navigationManager
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme"/>
 <MudPopoverProvider />
@@ -18,17 +20,21 @@
 
         <MudBadge Origin="Origin.TopRight" Content="@BadgeContent" Color="Color.Warning" Overlap="true" Style="position: relative;">
             <MudMenu Dense Size="Size.Medium" Icon="@Icons.Material.Outlined.ShoppingCart" Color="Color.Inherit">
-                <div style="padding:1rem;">
-                    <MudText Typo="Typo.h5"> 🔔 Notificaciones </MudText>
+                <MudStack Class="ma-4" AlignItems="AlignItems.Start" Spacing="2">
+                    <MudText Typo="Typo.h5"> Shoping Cart 🗑 </MudText>
                     <MudDivider />
 
                     @foreach (var item in itemDTOs)
                     {
-                        <MudItem>@item.RoomId - @item.Quantity </MudItem>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                            <MudAvatar Size="Size.Medium"><MudImage Src="@item.Photo"></MudImage></MudAvatar>
+                            <MudItem>@item.Name - @item.PricePerNight</MudItem>
+                            <MudIconButton OnClick="@(() => DeleteItemAsync(item))" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Edge="Edge.End" />
+                        </MudStack>
                     }
-
-                    <MudButton OnClick="@(() => Console.WriteLine("Me Tokaste 😁"))" StartIcon="@Icons.Material.Outlined.Group" Color="Color.Success"> Solicitudes </MudButton>
-                </div>
+                    <MudDivider />
+                    <MudButton OnClick="GoToTemporalBooking" StartIcon="@Icons.Material.Outlined.BookOnline" Color="Color.Success"> Reservar </MudButton>
+                </MudStack>
             </MudMenu>
         </MudBadge>
 
@@ -58,6 +64,7 @@
     private List<CartItemDTO> itemDTOs = [];
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
+    private void GoToTemporalBooking() => _navigationManager.NavigateTo("/TemporalBooking");
 
     private void DarkModeToggle()
     {
@@ -67,8 +74,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        itemDTOs = await _cartService.LoadAsync() ?? [];
         BadgeContent = _cartService.GetCount();
         _cartService.OnChangeAsync += LoadCartBookingsAsync;
+        await LoadCartBookingsAsync();
     }
 
     protected override async Task OnParametersSetAsync() => await LoadCartBookingsAsync();
@@ -78,6 +87,20 @@
         try
         {
             itemDTOs = await _cartService.LoadAsync();
+            BadgeContent = _cartService.GetCount();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+    }
+
+    private async Task DeleteItemAsync(CartItemDTO itemDTO)
+    {
+        try
+        {
+            await _cartService.RemoveItemAsync(itemDTO);
             BadgeContent = _cartService.GetCount();
             await InvokeAsync(StateHasChanged);
         }

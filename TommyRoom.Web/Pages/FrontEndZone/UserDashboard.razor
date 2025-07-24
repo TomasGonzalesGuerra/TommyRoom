@@ -20,7 +20,7 @@
                     <MudText Typo="Typo.subtitle2" Class="room-price">@($"S/.{room.PricePerNight:C} por noche")</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton OnClick="@(() => Saluda(room.Id))" StartIcon="@Icons.Material.Outlined.PointOfSale" Variant="Variant.Outlined" Color="Color.Success">
+                    <MudButton OnClick="@(() => Saluda(room))" StartIcon="@Icons.Material.Outlined.PointOfSale" Variant="Variant.Outlined" Color="Color.Success">
                         Reservar
                     </MudButton>
                 </MudCardActions>
@@ -58,11 +58,19 @@
         var dialog = await _dialogService.ShowAsync<DetailsRoom>(string.Empty, parameters, options);
     }
 
-    private async Task Saluda(int id)
+    private async Task Saluda(Room room)
     {
-        CartItemDTO itemDTO = new() { RoomId = id, Quantity = 1 };
+        CartItemDTO itemDTO = new()
+        {
+            Capacity = room.Capacity,
+            Description = room.Description,
+            Photo = room.Photo,
+            PricePerNight = room.PricePerNight,
+            RoomId = room.Id,
+            Name = room.Name,
+            Quantity = 1,
+        };
         await _cartService.AddItemAsync(itemDTO);
-        await _cartService.NotifyStateChangedAsync();
         _snackbar.Add("Se Agregó Correctamente", Severity.Success, conf => { conf.Icon = Icons.Material.Outlined.Check; conf.IconColor = Color.Success; conf.IconSize = Size.Large; });
     }
 }
