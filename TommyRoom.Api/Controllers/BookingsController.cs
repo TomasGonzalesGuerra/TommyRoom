@@ -73,6 +73,9 @@ namespace TommyRoom.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<CreatedBookingDTO>> PostBooking([FromBody] CreatedBookingDTO DTO)
         {
+            if (DTO.StartTime is null || DTO.EndTime is null) return BadRequest("Las Fechas son Obligatorias");
+            if (DTO.EndTime <= DTO.StartTime) return BadRequest("La fecha de fin debe ser posterior a la de inicio.");
+
             bool conflic = _dataContext.Bookings.Any(b => b.RoomId == DTO.RoomId && b.StartTime < DTO.EndTime && b.EndTime > DTO.StartTime);
             if (conflic) return BadRequest("La Habitación ya está Reservada en esas Fechas 😖 ...");
 
@@ -82,13 +85,13 @@ namespace TommyRoom.Api.Controllers
             Room? room = await _dataContext.Rooms.FindAsync(DTO.RoomId);
             if (room == null) return Unauthorized("Habitación NoTa 😖 ...");
 
-            int days = (DTO.EndTime - DTO.StartTime).Days;
+            int days = (DTO.EndTime!.Value - DTO.StartTime!.Value).Days;
             decimal totalPrice = days * room.PricePerNight;
 
             Booking booking = new()
             {
-                StartTime = DTO.StartTime.ToUniversalTime(),
-                EndTime = DTO.EndTime.ToUniversalTime(),
+                StartTime = DTO.StartTime.Value.ToUniversalTime(),
+                EndTime = DTO.EndTime.Value.ToUniversalTime(),
                 RoomId = DTO.RoomId,
                 TotalPrice = totalPrice,
                 GuestId = userLog.Id,

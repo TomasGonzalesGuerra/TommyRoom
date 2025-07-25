@@ -19,7 +19,7 @@
 }
 else
 {
-    <MudTable Items="@cartItemDTOs" Bordered="true" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
+    <MudTable Items="@bookingDTOs" Bordered="true" Hover="true" FixedHeader="true" Loading="@_loading" LoadingProgressColor="Color.Info" Style="width: 75%;">
         <ToolBarContent><MudText Typo="Typo.h4">Tus Reservas</MudText></ToolBarContent>
 
         <HeaderContent>
@@ -45,16 +45,24 @@ else
             </MudTd>
 
             <MudTd DataLabel="Inicio de Reserva">
-                <MudDatePicker @bind-Date="_startTime" Label="Inicio de Reserva" Required="true" RequiredError="El EndTime es Obligatorio!" />
+                <MudDatePicker @bind-Date="@context.StartTime"
+                            Label="Inicio de Reserva"
+                            DateFormat="dd/MM/yyyy"
+                            Required="true"
+                            RequiredError="El StartTime es Obligatorio!" />
             </MudTd>
 
             <MudTd DataLabel="Fin de Reserva">
-                <MudDatePicker @bind-Date="_endTime" Label="Fin de Reserva" Required="true" RequiredError="El EndTime es Obligatorio!" />
+                <MudDatePicker @bind-Date="@context.EndTime"
+                               Label="Fin de Reserva"
+                               DateFormat="dd/MM/yyyy"
+                               Required="true"
+                               RequiredError="El EndTime es Obligatorio!" />
             </MudTd>
 
             <MudTd DataLabel="Eliminar">
-                <MudIconButton OnClick="@(() => BookinRoomAsync(context.RoomId))" Icon="@Icons.Material.Outlined.BookmarkAdded" Color="Color.Success" Size="Size.Medium" />
-                <MudIconButton OnClick="@(() => DeleteItemAsync(context))" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Size="Size.Medium" />
+                <MudIconButton OnClick="@(() => BookinRoomAsync(context))" Icon="@Icons.Material.Outlined.BookmarkAdded" Color="Color.Success" Size="Size.Medium" />
+                <MudIconButton OnClick="@(() => DeleteItemAsync(context.RoomId))" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Size="Size.Medium" />
             </MudTd>
         </RowTemplate>
 
@@ -67,58 +75,82 @@ else
 
 @code {
     private List<CartItemDTO> cartItemDTOs = [];
+    private List<TemporalBookingDTO> bookingDTOs = [];
     private bool _loading = true;
-    private DateTime? _startTime = DateTime.Today.ToLocalTime();
-    private DateTime? _endTime = DateTime.Today.ToLocalTime();
 
 
     protected override async Task OnInitializedAsync()
     {
         _cartService.OnChangeAsync += LoadCartBookingsAsync;
         await LoadCartBookingsAsync();
+    }
+
+    private async Task LoadCartBookingsAsync()
+    {
+        cartItemDTOs = await _cartService.LoadAsync() ?? [];
+
+        if (cartItemDTOs != null)
+        {
+            bookingDTOs.Clear();
+            foreach (var item in cartItemDTOs)
+            {
+                bookingDTOs.Add(new()
+                {
+                    RoomId = item.RoomId,
+                    Name = item.Name,
+                    Description = item.Description,
+                    Capacity = item.Capacity,
+                    PricePerNight = item.PricePerNight,
+                    Photo = item.Photo,
+                    StartTime = DateTime.Now.ToLocalTime(),
+                    EndTime = DateTime.Now.ToLocalTime()
+                });
+            }
+        }
+
+        await InvokeAsync(StateHasChanged);
         _loading = false;
     }
 
-    private async Task BookinRoomAsync(int RoomId)
+    private async Task BookinRoomAsync(TemporalBookingDTO temporalDTO)
     {
         CreatedBookingDTO bookingDTO = new()
         {
-            RoomId = RoomId,
-            StartTime = _startTime!.Value,
-            EndTime = _endTime!.Value
+            RoomId = temporalDTO.RoomId,
+            StartTime = temporalDTO.StartTime,
+            EndTime = temporalDTO.EndTime
         };
 
-        // var httpResponse = await _repository.PostAsync("api/Bookings", bookingDTO);
+        var httpResponse = await _repository.PostAsync("api/Bookings", bookingDTO);
 
-        // if (httpResponse.Error)
-        // {
-        //     var message = await httpResponse.GetErrorMessageAsync();
-        //     await _sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
-        //     return;
-        // }
+        if (httpResponse.Error)
+        {
+            var message = await httpResponse.GetErrorMessageAsync();
+            await _sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
 
-        Console.WriteLine($"Booking Created: {bookingDTO.RoomId} from {_startTime} to {_endTime}");
-        Console.WriteLine($"Booking Created: {bookingDTO.RoomId} from {_startTime.Value - _endTime.Value}");
-
+        await DeleteItemAsync(temporalDTO.RoomId);
+        await LoadCartBookingsAsync();
         await InvokeAsync(StateHasChanged);
-        _snackbar.Add("Se AGREGÓ el Registro", Severity.Success);
+        _snackbar.Add("La RESERVA está Hecha", Severity.Success);
     }
 
-    private async Task DeleteItemAsync(CartItemDTO itemDTO)
+    private async Task DeleteItemAsync(int roomId)
     {
         try
         {
-            await _cartService.RemoveItemAsync(itemDTO!);
-            await InvokeAsync(StateHasChanged);
+            await _cartService.RemoveItemAsync(roomId!);
         }
         catch (Exception ex)
         {
             await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
         }
 
-        Console.WriteLine($"Item Deleted: {itemDTO.RoomId}");
+        await LoadCartBookingsAsync();
+        await InvokeAsync(StateHasChanged);
+        _snackbar.Add("Se BORRO el Registro", Severity.Success);
     }
 
-    private async Task LoadCartBookingsAsync() => cartItemDTOs = await _cartService.LoadAsync() ?? [];
     public void Dispose() => _cartService.OnChangeAsync -= LoadCartBookingsAsync;
 }

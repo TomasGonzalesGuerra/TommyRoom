@@ -68,7 +68,6 @@
             PricePerNight = room.PricePerNight,
             RoomId = room.Id,
             Name = room.Name,
-            Quantity = 1,
         };
         await _cartService.AddItemAsync(itemDTO);
         _snackbar.Add("Se Agregó Correctamente", Severity.Success, conf => { conf.Icon = Icons.Material.Outlined.Check; conf.IconColor = Color.Success; conf.IconSize = Size.Large; });

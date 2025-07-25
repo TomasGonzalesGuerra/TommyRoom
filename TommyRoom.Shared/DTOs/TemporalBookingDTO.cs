@@ -1,6 +1,6 @@
 ﻿namespace TommyRoom.Shared.DTOs;
 
-public class CartItemDTO
+public class TemporalBookingDTO
 {
     public int RoomId { get; set; }
     public string? Name { get; set; }
@@ -8,4 +8,6 @@ public class CartItemDTO
     public string? Photo { get; set; }
     public int Capacity { get; set; }
     public decimal PricePerNight { get; set; }
+    public DateTime? StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
 }

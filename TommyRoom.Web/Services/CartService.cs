@@ -20,9 +20,12 @@ public class CartService(ILocalStorageService localStorage) : ICartService
         await NotifyStateChangedAsync();
     }
 
-    public async Task RemoveItemAsync(CartItemDTO item)
+    public async Task RemoveItemAsync(int roomId)
     {
-        Items.Remove(item);
+        CartItemDTO? itemToRemove = Items.FirstOrDefault(i => i.RoomId == roomId);
+
+        if (itemToRemove != null) Items.Remove(itemToRemove);
+
         await _localStorage.SetItemAsync(CartKey, Items);
         await NotifyStateChangedAsync();
     }

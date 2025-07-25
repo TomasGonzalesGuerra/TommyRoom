@@ -11,6 +11,6 @@ namespace TommyRoom.Web.Services
         Task NotifyStateChangedAsync();
         Task<List<CartItemDTO>> LoadAsync();
         Task AddItemAsync(CartItemDTO item);
-        Task RemoveItemAsync(CartItemDTO item);
+        Task RemoveItemAsync(int roomId);
     }
 }

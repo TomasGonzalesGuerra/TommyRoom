@@ -18,7 +18,7 @@
 
         <AuthLinks />
 
-        <MudBadge Origin="Origin.TopRight" Content="@BadgeContent" Color="Color.Warning" Overlap="true" Style="position: relative;">
+        <MudBadge Origin="Origin.TopRight" Content="@_badgeContent" Visible="@_visible" Color="Color.Warning" Overlap="true" Style="position: relative;">
             <MudMenu Dense Size="Size.Medium" Icon="@Icons.Material.Outlined.ShoppingCart" Color="Color.Inherit">
                 <MudStack Class="ma-4" AlignItems="AlignItems.Start" Spacing="2">
                     <MudText Typo="Typo.h5"> Shoping Cart 🗑 </MudText>
@@ -29,7 +29,7 @@
                         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
                             <MudAvatar Size="Size.Medium"><MudImage Src="@item.Photo"></MudImage></MudAvatar>
                             <MudItem>@item.Name - @item.PricePerNight</MudItem>
-                            <MudIconButton OnClick="@(() => DeleteItemAsync(item))" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Edge="Edge.End" />
+                            <MudIconButton OnClick="@(() => DeleteItemAsync(item.RoomId))" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Edge="Edge.End" />
                         </MudStack>
                     }
                     <MudDivider />
@@ -56,12 +56,13 @@
 </MudLayout>
 
 @code {
-    private bool _isDarkMode = true;
-    private bool _drawerOpen = false;
     private MudTheme _theme = new();
     private string _icon = Icons.Material.Outlined.DarkMode;
-    private int BadgeContent;
+    private bool _isDarkMode = true;
+    private bool _drawerOpen;
     private List<CartItemDTO> itemDTOs = [];
+    private int _badgeContent;
+    private bool _visible;
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
     private void GoToTemporalBooking() => _navigationManager.NavigateTo("/TemporalBooking");
@@ -74,8 +75,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        itemDTOs = await _cartService.LoadAsync() ?? [];
-        BadgeContent = _cartService.GetCount();
         _cartService.OnChangeAsync += LoadCartBookingsAsync;
         await LoadCartBookingsAsync();
     }
@@ -87,7 +86,8 @@
         try
         {
             itemDTOs = await _cartService.LoadAsync();
-            BadgeContent = _cartService.GetCount();
+            _badgeContent = _cartService.GetCount();
+            _visible = _badgeContent > 0 ? true : false;
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -96,12 +96,12 @@
         }
     }
 
-    private async Task DeleteItemAsync(CartItemDTO itemDTO)
+    private async Task DeleteItemAsync(int roomId)
     {
         try
         {
-            await _cartService.RemoveItemAsync(itemDTO);
-            BadgeContent = _cartService.GetCount();
+            await _cartService.RemoveItemAsync(roomId);
+            await LoadCartBookingsAsync();
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
