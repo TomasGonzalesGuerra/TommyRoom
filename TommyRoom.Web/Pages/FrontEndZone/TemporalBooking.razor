@@ -131,7 +131,6 @@ else
         }
 
         await DeleteItemAsync(temporalDTO.RoomId);
-        await LoadCartBookingsAsync();
         await InvokeAsync(StateHasChanged);
         _snackbar.Add("La RESERVA está Hecha", Severity.Success);
     }
