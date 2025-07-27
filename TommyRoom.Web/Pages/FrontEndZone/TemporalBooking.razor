@@ -6,16 +6,22 @@
 @inject IDialogService _dialogService
 @inject SweetAlertService _sweetAlertService
 @inject NavigationManager _navigationManager
+@inject ReservationNotificationState _reservationState
 
 <PageTitle>Temporal Booking</PageTitle>
 
 @if (cartItemDTOs == null)
 {
-    <MudPaper Class="pa-4">
-        <MudImage Src="https://th.bing.com/th/id/OIG4.7UF2xD7d4zNIQTKR5bfn?pid=ImgGn" Alt="No Friends" Style="width: auto; height: 60vh; object-fit: cover;" />
-
-        <MudText Typo="Typo.h6" Color="Color.Error"> Sin Amigos ??? </MudText>
-    </MudPaper>
+    <MudStack Class="pa-4">
+        <MudText Typo="Typo.h1" Color="Color.Error"> Objeto Nulo </MudText>
+    </MudStack>
+}
+else if (cartItemDTOs.Count() == 0)
+{
+    <MudStack Class="pa-4">
+        <MudImage Src="https://cdn-icons-png.flaticon.com/512/12044/12044970.png" Style="width: auto; height: 50vh; object-fit: cover;" />
+        <MudText Typo="Typo.h6" Color="Color.Error"> Sin Registros </MudText>
+    </MudStack>
 }
 else
 {
@@ -131,7 +137,7 @@ else
         }
 
         await DeleteItemAsync(temporalDTO.RoomId);
-        await InvokeAsync(StateHasChanged);
+        _reservationState.Notify(bookingDTO);
         _snackbar.Add("La RESERVA está Hecha", Severity.Success);
     }
 
@@ -147,8 +153,6 @@ else
         }
 
         await LoadCartBookingsAsync();
-        await InvokeAsync(StateHasChanged);
-        _snackbar.Add("Se BORRO el Registro", Severity.Success);
     }
 
     public void Dispose() => _cartService.OnChangeAsync -= LoadCartBookingsAsync;

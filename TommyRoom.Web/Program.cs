@@ -29,11 +29,13 @@ builder.Services.AddMudServices(config =>
 });
 builder.Services.AddSweetAlert2();
 builder.Services.AddScoped<IRepository, Repository>();
-builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationProviderJWT>();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderJWT>(x => x.GetRequiredService<AuthenticationProviderJWT>());
 builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(x => x.GetRequiredService<AuthenticationProviderJWT>());
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ReservationNotificationState>();
+
 
 await builder.Build().RunAsync();

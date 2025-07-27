@@ -20,21 +20,28 @@
 
         <MudBadge Origin="Origin.TopRight" Content="@_badgeContent" Visible="@_visible" Color="Color.Warning" Overlap="true" Style="position: relative;">
             <MudMenu Dense Size="Size.Medium" Icon="@Icons.Material.Outlined.ShoppingCart" Color="Color.Inherit">
-                <MudStack Class="ma-4" AlignItems="AlignItems.Start" Spacing="2">
-                    <MudText Typo="Typo.h5"> Shoping Cart 🗑 </MudText>
-                    <MudDivider />
+                @if (itemDTOs != null)
+                {
+                    <MudStack Class="ma-4" AlignItems="AlignItems.Start" Spacing="2">
+                        <MudText Typo="Typo.h5"> Shoping Cart 🗑 </MudText>
+                        <MudDivider />
 
-                    @foreach (var item in itemDTOs)
-                    {
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
-                            <MudAvatar Size="Size.Medium"><MudImage Src="@item.Photo"></MudImage></MudAvatar>
-                            <MudItem>@item.Name - @item.PricePerNight</MudItem>
-                            <MudIconButton OnClick="@(() => DeleteItemAsync(item.RoomId))" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Edge="Edge.End" />
-                        </MudStack>
-                    }
-                    <MudDivider />
-                    <MudButton OnClick="GoToTemporalBooking" StartIcon="@Icons.Material.Outlined.BookOnline" Color="Color.Success"> Reservar </MudButton>
-                </MudStack>
+                        @foreach (var item in itemDTOs)
+                        {
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                                <MudAvatar Size="Size.Medium"><MudImage Src="@item.Photo"></MudImage></MudAvatar>
+                                <MudItem>@item.Name - @item.PricePerNight</MudItem>
+                                <MudIconButton OnClick="@(() => DeleteItemAsync(item.RoomId))" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Edge="Edge.End" />
+                            </MudStack>
+                        }
+                        <MudDivider />
+                        <MudButton OnClick="GoToTemporalBooking" StartIcon="@Icons.Material.Outlined.BookOnline" Color="Color.Success"> Reservar </MudButton>
+                    </MudStack>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h5" Class="ma-4"> No hay Naaa... 😒 </MudText>
+                }
             </MudMenu>
         </MudBadge>
 

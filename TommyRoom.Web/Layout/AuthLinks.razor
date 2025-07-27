@@ -1,18 +1,23 @@
-﻿@inject IRepository _repository
+﻿@implements IDisposable
+@inject IRepository _repository
 @inject IDialogService _dialogService
 @inject NavigationManager _navigationManager
 @inject SweetAlertService _sweetAlertService
+@inject ReservationNotificationState _reservationState
 
 <AuthorizeView>
     <Authorized>
         <MudText Style="margin: auto;" Typo="Typo.body1" Align="Align.Center"> Hey! @FullName</MudText>
-        
-        @if (!string.IsNullOrEmpty(photoUser))
-        {
-            <MudAvatar Size="Size.Medium">
+        <MudAvatar Size="Size.Medium">
+            @if (!string.IsNullOrEmpty(photoUser))
+            {
                 <MudImage Src="@photoUser"></MudImage>
-            </MudAvatar>
-        }
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Outlined.Person" Color="Color.Primary" Size="Size.Medium"></MudIcon>
+            }
+        </MudAvatar>
 
         <MudMenu Dense Size="Size.Medium" Icon="@Icons.Material.Outlined.Settings" Color="Color.Inherit">
             <MudMenuItem OnClick="ShowModalLogOut" ForceLoad Icon="@Icons.Material.TwoTone.Logout" IconColor="Color.Error" Label="Sign Out" />
@@ -22,19 +27,26 @@
             </MudMenu>
         </MudMenu>
 
-        <MudBadge Origin="Origin.TopRight" Content="@BadgeContent" Color="Color.Warning" Overlap="true" Style="position: relative;">
+        <MudBadge  Origin="Origin.TopRight" Content="1" Visible="@_reservationState.HasNewNotification" Color="Color.Warning" Overlap="true" Style="position: relative;">
             <MudMenu Dense Size="Size.Medium" Icon="@Icons.Material.Outlined.Notifications" Color="Color.Inherit">
-                <div style="padding:1rem;">
-                    <MudText Typo="Typo.h5"> 🔔 Notificaciones </MudText>
-                    <MudDivider />
-
-                    @foreach (var item in UserNotifications)
-                    {
-                        @* <MudItem>@item.Message - @item.CreatedAt.ToLocalTime() </MudItem> *@
-                    }
-
-                    <MudButton OnClick="@(() => Console.WriteLine("Me Tokaste 😁"))" StartIcon="@Icons.Material.Outlined.Group" Color="Color.Success"> Solicitudes </MudButton>
-                </div>
+                @if (_reservationState.LatestReservation != null)
+                {                    
+                    <MudStack Class="ma-4" AlignItems="AlignItems.Start" Spacing="2">
+                        <MudText Typo="Typo.h5"> 🔔 Tienes una Reserva 🎉 </MudText>
+                        <MudDivider />
+                        <MudText>Habitación: @_reservationState.LatestReservation?.RoomId</MudText>
+                        <MudText>Del @_reservationState.LatestReservation?.StartTime al @_reservationState.LatestReservation?.EndTime</MudText>
+                        <MudDivider/>
+                        <MudStack Row="true" Class="justify-end" Style="width:100%;" Spacing="2">
+                            <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => GoToAllNotifies(_reservationState.LatestReservation!))"> Ver Todas </MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@_reservationState.Clear"> Cerrar </MudButton>
+                        </MudStack>
+                    </MudStack>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h5" Class="ma-4"> No hay Naaa... 😒 </MudText>
+                }
             </MudMenu>
         </MudBadge>
     </Authorized>
@@ -58,8 +70,9 @@
     private string? userType;
     private string? photoUser;
     private string? FullName;
-    private List<string> UserNotifications = [];
 
+
+    protected override void OnInitialized() => _reservationState.OnChange += StateHasChanged;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -72,40 +85,9 @@
         if (photoClaim is not null) photoUser = photoClaim.Value;
         if (nameClaim is not null) FullName = nameClaim.Value;
         if (userTypeClaim is not null) userType = userTypeClaim.ToString();
-        
-        // await LoadAsync();
     }
 
     private void GoToEditUser() => _navigationManager.NavigateTo("/EditUser");
-
-    private async Task LoadAsync()
-    {
-        var authenticationState = await AuthenticationStateTask;
-
-        @if (authenticationState.User.Identity!.IsAuthenticated)
-        {
-            try
-            {
-                // var responseHppt = await _repository.GetAsync<List<Notification>>("/api/Accounts/GetUserAllNotis");
-                // UserNotifications = responseHppt.Response!;
-                // BadgeContent = UserNotifications.Count;
-            }
-            catch (Exception ex)
-            {
-                await _sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
-            }
-        }
-
-        StateHasChanged();
-    }
-
-    private async Task ShowPendingRequestsAsync()
-    {
-        // var options = new DialogOptions { CloseOnEscapeKey = true, BackgroundClass = "my-custom-class", MaxWidth = MaxWidth.ExtraLarge };
-        // var dialog = await _dialogService.ShowAsync<FriendRequests>("Solicitudes de Amistad", options);
-        // var result = await dialog.Result;
-        // if (!result!.Canceled) await LoadAsync();
-    }
 
     private void GoToRegister() => _navigationManager.NavigateTo("/Register");
 
@@ -120,4 +102,12 @@
         var closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true };
         _dialogService.ShowAsync<Logout>("Log Out", closeOnEscapeKey);
     }
+
+    private void GoToAllNotifies(CreatedBookingDTO DTO)
+    {
+        Console.WriteLine($"Navigating to all notifications con: {DTO.RoomId}");
+        _reservationState.Clear();
+    }
+
+    public void Dispose() => _reservationState.OnChange -= StateHasChanged;
 }
