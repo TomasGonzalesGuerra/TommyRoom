@@ -20,7 +20,7 @@
 
         <MudBadge Origin="Origin.TopRight" Content="@_badgeContent" Visible="@_visible" Color="Color.Warning" Overlap="true" Style="position: relative;">
             <MudMenu Dense Size="Size.Medium" Icon="@Icons.Material.Outlined.ShoppingCart" Color="Color.Inherit">
-                @if (itemDTOs != null)
+                @if (itemDTOs.Count() > 0)
                 {
                     <MudStack Class="ma-4" AlignItems="AlignItems.Start" Spacing="2">
                         <MudText Typo="Typo.h5"> Shoping Cart 🗑 </MudText>
