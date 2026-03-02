@@ -1,5 +1,83 @@
-﻿<h3>LandingHome</h3>
+﻿@* @page "/landinghome" *@
+@page "/"
+@layout LandingLayout
+
+<main class="">
+    <div class="big-wrapper @(dark ? "dark" : "light") @(active ? "active" : "")">
+        <img src="@shapeSource" alt="" class="shape" />
+
+        <header>
+          <div class="container ddd">
+            <div class="logo">
+              <img src="@logoSource" alt="Logo" />
+              <h3>Danvo in a new branch</h3>
+            </div>
+
+            <div class="links">
+              <ul>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Pricing</a></li>
+                <li><a href="#">Testimonials</a></li>
+                <li><a href="#" class="btn">Sign up</a></li>
+              </ul>
+            </div>
+
+            <div class="overlay"></div>
+
+            <div class="hamburger-menu">
+              <div class="bar"></div>
+            </div>
+          </div>
+        </header>
+
+        <div class="showcase-area">
+          <div class="container">
+            <div class="left">
+              <div class="big-title">
+                <h1>Future is here,</h1>
+                <h1>Start Exploring now.</h1>
+              </div>
+              <p class="text">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Delectus eius distinctio odit, magni magnam qui ex perferendis
+                vitae!
+              </p>
+              <div class="cta">
+                <a href="#" class="btn">Get started</a>
+              </div>
+            </div>
+
+            <div class="right">
+                    <img src="@imageSource" alt="Person Image" class="person" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-area">
+            <div class="container">
+                <button class="toggle-btn" @onclick="Tokaste">
+                    <i class="far fa-moon"></i>
+                    <i class="far fa-sun"></i>
+                </button>
+                <div class="nopaint @(paint ? "paint" : "")"></div>
+            </div>
+        </div>
+      </div>
+    </main>
 
 @code {
+    private string logoSource = "img/logo.png";
+    private string imageSource = "img/person.png";
+    private string shapeSource = "img/shape.png";
+    private bool dark;
+    private bool active;
+    private bool paint;
 
+    private async void Tokaste()
+    {
+        paint = !paint;
+        await Task.Delay(500);
+        dark = !dark;
+        StateHasChanged();
+    }
 }
