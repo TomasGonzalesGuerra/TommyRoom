@@ -372,8 +372,8 @@ header {
     color: var(--backgroundColor);
     outline: none;
     cursor: pointer;
-    height: 4rem;
-    width: 4rem;
+    height: 2.5rem;
+    width: 2.5rem;
     border-radius: 50%;
     font-size: 1.1rem;
     transition: 0.3s;
@@ -543,6 +543,7 @@ header {
     }
 }
 
+
 .bottom-area{
     z-index: 0;
 }
@@ -551,17 +552,17 @@ header {
     position: absolute;
     top: 0;
     left: 0;
-    width: 4rem;
-    height: 4rem;
+    width: 2.5rem;
+    height: 2.5rem;
     margin-left: 3rem;
     border-radius: 50%;
     transform: scale(0);
-    transition: 1s ease;
-    background-color: #192e3a;
+    transition: 1s ease-in-out;
+    background-color: var(--backgroundColor);
 }
 
     .nopaint.paint {
-        transform: scale(90);
-        transition: 1s ease;
+        transform: scale(80);
+        transition: 1s ease-in-out;
         background-color: #192e3a;
     }
