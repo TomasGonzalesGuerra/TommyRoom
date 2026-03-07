@@ -33,6 +33,15 @@
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js"></script>
+    <script>
+        const nav = document.getElementById('mainNav');
+        if (!nav) return;
+        const threshold = 60;
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > threshold) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        }, { passive: true });
+    </script>
 </body>
 
 </html>

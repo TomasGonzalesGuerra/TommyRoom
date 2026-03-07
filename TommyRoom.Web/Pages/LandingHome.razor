@@ -2,81 +2,76 @@
 @page "/"
 @layout LandingLayout
 
-<main class="">
-<div class="big-wrapper @(dark ? "dark" : "light") @(active ? "active" : "")">
-    <img src="@shapeSource" alt="" class="shape" />
+<nav id="mainNav" class="navbar @(navScrolled ? "scrolled" : "")">
+    <div class="nav-inner">
+        <a class="brand" href="/">MiAlquiler</a>
 
-    <header>
-        <div class="container ddd">
-        <div class="logo">
-            <img src="@logoSource" alt="Logo" />
-            <h3>Danvo in a new branch</h3>
-        </div>
+        <!-- Botón hamburguesa (visible en móvil/tablet pequeño) -->
+        <button class="nav-toggle" aria-controls="primaryNav" aria-expanded="@isMenuOpen" @onclick="ToggleMenu" aria-label="Abrir menú">
+            <span class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </span>
+        </button>
 
-        <div class="links">
-            <ul>
-            <li><a href="#">Features</a></li>
-            <li><a href="#">Pricing</a></li>
-            <li><a href="#">Testimonials</a></li>
-            <li><a href="#" class="btn">Sign up</a></li>
-            </ul>
-        </div>
-
-        <div class="overlay"></div>
-
-        <div class="hamburger-menu">
-            <div class="bar"></div>
-        </div>
-        </div>
-    </header>
-
-    <div class="showcase-area">
-        <div class="container">
-        <div class="left">
-            <div class="big-title">
-            <h1>Future is here,</h1>
-            <h1>Start Exploring now.</h1>
-            </div>
-            <p class="text">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Delectus eius distinctio odit, magni magnam qui ex perferendis
-            vitae!
-            </p>
-            <div class="cta">
-            <a href="#" class="btn">Get started</a>
-            </div>
-        </div>
-
-        <div class="right">
-                @* <img src="@imageSource" alt="Person Image" class="person" /> *@
-        </div>
-        </div>
+        <!-- Links principales -->
+        <ul id="primaryNav" class="nav-links @(isMenuOpen ? "open" : "")" role="menu">
+            <li role="none"><a role="menuitem" href="#rooms">Habitaciones</a></li>
+            <li role="none"><a role="menuitem" href="#about">Sobre</a></li>
+            <li role="none"><a role="menuitem" href="#contact">Contacto</a></li>
+        </ul>
     </div>
+</nav>
 
-    <div class="bottom-area">
-        <div class="container">
-            <button class="toggle-btn" @onclick="Tokaste">
-                <i class="far fa-moon"></i>
-                <i class="far fa-sun"></i>
-            </button>
-            <div class="nopaint @(paint ? "paint" : "")"></div>
-        </div>
+<header class="hero">
+    <div class="hero-left">
+        <h1>Encuentra tu habitación ideal</h1>
+        <p>Espacios cómodos, seguros y cerca de todo.</p>
     </div>
+    <div class="hero-right" aria-hidden="true"></div>
+</header>
+
+<section class="search-banner">
+    <div class="search-inner">
+        <label>
+            <span class="sr-only">Distrito</span>
+            <select aria-label="Distrito">
+                <option>Lima Cercado</option>
+                <option>Miraflores</option>
+                <option>San Isidro</option>
+            </select>
+        </label>
+        <label>
+            <span class="sr-only">Fecha inicio</span>
+            <input type="date" aria-label="Fecha inicio" />
+        </label>
+        <label>
+            <span class="sr-only">Fecha fin</span>
+            <input type="date" aria-label="Fecha fin" />
+        </label>
+        <button class="btn-search">Buscar</button>
     </div>
-</main>
+</section>
 
+@* <section class="sponsors">
+    <div class="sponsor-track">
+        <div class="logo">Marca A</div>
+        <div class="logo">Marca B</div>
+        <div class="logo">Marca C</div>
+        <div class="logo">Marca D</div>
+    </div>
+</section> *@
 
-<style>
-    main{
-        background-image: url(@imageSource);
-        background-origin: content-box;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
+@code {
+    private bool isMenuOpen = false;
+    private bool navScrolled = false;
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
     }
-</style>
-
-
+}
 
 @code {
     private string logoSource = "img/logo.png";
