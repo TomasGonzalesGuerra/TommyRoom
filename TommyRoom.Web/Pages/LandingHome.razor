@@ -25,11 +25,10 @@
 </nav>
 
 <header class="hero">
-    <div class="hero-left">
+    <div class="hero-left maxW">
         <h1>Encuentra tu habitación ideal</h1>
         <p>Espacios cómodos, seguros y cerca de todo.</p>
     </div>
-    <div class="hero-right" aria-hidden="true"></div>
 </header>
 
 <section class="search-banner">
@@ -66,14 +65,6 @@
 @code {
     private bool isMenuOpen = false;
     private bool navScrolled = false;
-
-    private void ToggleMenu()
-    {
-        isMenuOpen = !isMenuOpen;
-    }
-}
-
-@code {
     private string logoSource = "img/logo.png";
     // private string imageSource = "img/person.png";
     private string shapeSource = "img/shape.png";
@@ -81,6 +72,11 @@
     private bool dark;
     private bool active;
     private bool paint;
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
 
     private async void Tokaste()
     {

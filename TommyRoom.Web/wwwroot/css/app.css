@@ -99,7 +99,12 @@ a, .btn-link {
     }
 
 
-
+#app{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 :root {
     --maxWidth: 1250px;
@@ -109,7 +114,7 @@ a, .btn-link {
     --mainColor: #64bcf4;
     --hoverColor: #5bacdf;
     --backgroundColor: #192e3a;
-    --darkOne: #17242c;
+    --darkOne: rgba(23, 36, 44, 0.7);
     --darkTwo: #fff;
     --lightOne: #192e3a;
     --lightTwo: #e7e3e3;
@@ -141,10 +146,10 @@ body {
     right: 0;
     z-index: 1000;
     background: transparent;
-    transition: background .25s ease, box-shadow .25s ease;
     height: var(--navHeight);
     display: flex;
     align-items: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,.18);
 }
 
 .nav-inner {
@@ -269,31 +274,26 @@ body {
     }
 }
 
-/* Navbar scrolled */
-.navbar.scrolled {
-    background: var(--navScrolled);
-    box-shadow: 0 6px 18px rgba(0,0,0,.18);
-    color: #fff;
+.maxW{
+    max-width: var(--maxWidth);
 }
 
-    .navbar.scrolled .hamburger .bar {
-        background: #fff;
-    }
-
-    .navbar.scrolled .nav-links a {
-        color: #fff;
-    }
-
 /* Hero y resto (resumen, conserva lo anterior) */
+header {
+    background: url('/img/BGTwo.png');
+    background-size: cover;
+    background-origin: content-box;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 .hero {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    min-height: 60vh;
-    max-width: var(--maxWidth);
-    margin: 0 auto;
-    padding: 6rem 1rem 2rem;
-    gap: 1rem;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
 }
 
 .hero-left {
@@ -302,17 +302,11 @@ body {
     z-index: 2;
 }
 
-.hero-right {
-    flex: 1;
-    background: url('/images/room.jpg') center/cover no-repeat;
-    filter: blur(2px) brightness(.9);
-    opacity: .95;
-    border-radius: 8px;
-    min-height: 260px;
-}
-
 /* Search banner */
 .search-banner {
+    position: absolute;
+    top: 85%;
+    left: 30%;
     display: flex;
     justify-content: center;
 }
@@ -399,23 +393,15 @@ body {
 }
 
 @media (min-width:601px) and (max-width:900px) { /* tablet pequeño */
-    .hero {
-        padding-top: 6rem;
-    }
-
     .search-inner {
         flex-direction: row;
     }
 }
 
 @media (min-width:901px) and (max-width:1200px) { /* laptop */
-    .hero {
-        padding-top: 6.5rem;
-    }
+
 }
 
 @media (min-width:1201px) { /* desktop */
-    .hero {
-        padding-top: 8rem;
-    }
+
 }
