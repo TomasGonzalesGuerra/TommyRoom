@@ -1,5 +1,4 @@
-﻿@* @page "/landinghome" *@
-@page "/"
+﻿@page "/landinghome"
 @layout LandingLayout
 
 <nav id="mainNav" class="navbar @(navScrolled ? "scrolled" : "")">
@@ -17,9 +16,10 @@
 
         <!-- Links principales -->
         <ul id="primaryNav" class="nav-links @(isMenuOpen ? "open" : "")" role="menu">
-            <li role="none"><a role="menuitem" href="#rooms">Habitaciones</a></li>
-            <li role="none"><a role="menuitem" href="#about">Sobre</a></li>
-            <li role="none"><a role="menuitem" href="#contact">Contacto</a></li>
+            <li role="none"><a role="menuitem" href="/">VOLVER</a></li>
+            <li role="none"><a role="menuitem" @onclick="ShowThisSnackbar">Habitaciones</a></li>
+            <li role="none"><a role="menuitem" @onclick="ShowThisSnackbar">Sobre</a></li>
+            <li role="none"><a role="menuitem" @onclick="ShowThisSnackbar">Contacto</a></li>
         </ul>
     </div>
 </nav>
@@ -53,14 +53,8 @@
     </div>
 </section>
 
-@* <section class="sponsors">
-    <div class="sponsor-track">
-        <div class="logo">Marca A</div>
-        <div class="logo">Marca B</div>
-        <div class="logo">Marca C</div>
-        <div class="logo">Marca D</div>
-    </div>
-</section> *@
+<div class="snackbar @SnackbarClass"><h2>@SnackbarMessage</h2></div>
+
 
 @code {
     private bool isMenuOpen = false;
@@ -72,6 +66,9 @@
     private bool dark;
     private bool active;
     private bool paint;
+    private string SnackbarMessage = "Pronto, Pronto, Pronto ...";
+    private string SnackbarClass = string.Empty;
+
 
     private void ToggleMenu()
     {
@@ -83,6 +80,14 @@
         paint = !paint;
         await Task.Delay(400);
         dark = !dark;
+        StateHasChanged();
+    }
+
+    private async void ShowThisSnackbar()
+    {
+        SnackbarClass = "show";
+        await Task.Delay(1500);
+        SnackbarClass = string.Empty;
         StateHasChanged();
     }
 }
