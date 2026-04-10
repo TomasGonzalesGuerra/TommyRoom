@@ -1,0 +1,150 @@
+@inject HttpClient _Http
+@inject NavigationManager _NavigationManager
+@inject AuthenticationStateProvider _AuthStateProvider
+
+<div class="tr-bw">
+    <div class="tr-bw__price">
+        $@Room.PricePerNight <span>per night</span>
+    </div>
+
+    <!-- DATES -->
+    <div class="tr-bw__dates">
+        <div class="tr-bw__field">
+            <span class="tr-bw__field-label">Check-in</span>
+            <input class="tr-bw__field-input" type="date"
+                   @bind="_checkIn"
+                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="tr-bw__field tr-bw__field--right">
+            <span class="tr-bw__field-label">Check-out</span>
+            <input class="tr-bw__field-input" type="date"
+                   @bind="_checkOut"
+                   min="@(_checkIn?.AddDays(1).ToString("yyyy-MM-dd") ?? DateTime.Today.AddDays(1).ToString("yyyy-MM-dd"))" />
+        </div>
+    </div>
+
+    <!-- ERRORS -->
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="tr-bw__error">@_errorMessage</div>
+    }
+
+    <!-- CTA -->
+    @if (Room.IsAvailable)
+    {
+        <button class="tr-btn tr-btn--primary tr-bw__cta"
+                @onclick="HandleReserve"
+                disabled="@_submitting">
+            @if (_submitting)
+            {
+                <span class="tr-bw__spinner"></span>
+                <span>Reserving...</span>
+            }
+            else
+            {
+                <span>Reserve Now</span>
+            }
+        </button>
+    }
+    else
+    {
+        <button class="tr-btn tr-btn--ghost tr-bw__cta" disabled>
+            Not Available
+        </button>
+    }
+
+    <!-- TOTAL -->
+    @if (_nights > 0)
+    {
+        <div class="tr-bw__breakdown">
+            <div class="tr-bw__breakdown-row">
+                <span>$@Room.PricePerNight × @_nights night@(_nights != 1 ? "s" : "")</span>
+                <span class="tr-bw__breakdown-total">$@(_nights * Room.PricePerNight)</span>
+            </div>
+        </div>
+    }
+
+    <p class="tr-bw__note">You won't be charged yet</p>
+</div>
+
+@if (_success)
+{
+    <div class="tr-bw__success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Booking confirmed! <a href="/my-bookings">View my bookings →</a>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public Room Room { get; set; } = default!;
+
+    private DateTime? _checkIn;
+    private DateTime? _checkOut;
+    private bool _submitting;
+    private bool _success;
+    private string _errorMessage = "";
+
+    private int _nights => (_checkIn.HasValue && _checkOut.HasValue && _checkOut > _checkIn)
+        ? (_checkOut.Value - _checkIn.Value).Days
+        : 0;
+
+    private async Task HandleReserve()
+    {
+        _errorMessage = "";
+
+        if (_checkIn is null || _checkOut is null)
+        {
+            _errorMessage = "Please select check-in and check-out dates.";
+            return;
+        }
+        if (_checkOut <= _checkIn)
+        {
+            _errorMessage = "Check-out must be after check-in.";
+            return;
+        }
+
+        var authState = await _AuthStateProvider.GetAuthenticationStateAsync();
+        if (!authState.User.Identity?.IsAuthenticated ?? true)
+        {
+            _NavigationManager.NavigateTo($"/login?returnUrl=/rooms/{Room.Id}");
+            return;
+        }
+
+        _submitting = true;
+
+        var dto = new CreatedBookingDTO
+        {
+            RoomId   = Room.Id,
+            StartTime = _checkIn,
+            EndTime   = _checkOut
+        };
+
+        try
+        {
+            var response = await _Http.PostAsJsonAsync("api/Bookings", dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _success = true;
+                _checkIn = null;
+                _checkOut = null;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                _errorMessage = string.IsNullOrWhiteSpace(error)
+                    ? "Something went wrong. Please try again."
+                    : error.Trim('"');
+            }
+        }
+        catch
+        {
+            _errorMessage = "Connection error. Please try again.";
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+}
