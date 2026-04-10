@@ -1,0 +1,72 @@
+@inject NavigationManager _Nav
+
+<nav class="tr-nav">
+    <a href="/" class="tr-nav__logo">Tommy<span>Room</span></a>
+
+    <!-- Desktop links -->
+    <div class="tr-nav__links">
+        <a href="/" class="tr-nav__link @(IsActive("/") ? "tr-nav__link--active" : "")">Rooms</a>
+        <a href="/about" class="tr-nav__link @(IsActive("/about") ? "tr-nav__link--active" : "")">About</a>
+        <a href="/contact" class="tr-nav__link @(IsActive("/contact") ? "tr-nav__link--active" : "")">Contact</a>
+    </div>
+
+    <!-- Actions -->
+    <div class="tr-nav__actions">
+        <AuthorizeView>
+            <Authorized>
+                <a href="/my-bookings" class="tr-nav__link @(IsActive("/my-bookings") ? "tr-nav__link--active" : "")">My Bookings</a>
+                <a href="/profile" class="tr-nav__icon" title="Profile">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                    </svg>
+                </a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/login" class="tr-btn tr-btn--outline">Sign In</a>
+                <a href="/register" class="tr-btn tr-btn--primary">Book Now</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+
+    <!-- Hamburger -->
+    <button class="tr-nav__ham" @onclick="ToggleMenu" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</nav>
+
+<!-- Mobile drawer -->
+@if (_menuOpen)
+{
+    <div class="tr-nav__drawer">
+        <a href="/" class="tr-nav__drawer-link" @onclick="CloseMenu">Rooms</a>
+        <a href="/about" class="tr-nav__drawer-link" @onclick="CloseMenu">About</a>
+        <a href="/contact" class="tr-nav__drawer-link" @onclick="CloseMenu">Contact</a>
+        <div class="tr-nav__drawer-divider"></div>
+        <AuthorizeView>
+            <Authorized>
+                <a href="/my-bookings" class="tr-nav__drawer-link" @onclick="CloseMenu">My Bookings</a>
+                <a href="/profile" class="tr-nav__drawer-link" @onclick="CloseMenu">Profile</a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/login" class="tr-nav__drawer-link" @onclick="CloseMenu">Sign In</a>
+                <a href="/register" class="tr-btn tr-btn--primary" style="margin-top:8px;" @onclick="CloseMenu">Book Now</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+}
+
+@code {
+    private bool _menuOpen;
+
+    private void ToggleMenu() => _menuOpen = !_menuOpen;
+    private void CloseMenu() => _menuOpen = false;
+
+    private bool IsActive(string href)
+    {
+        var current = _Nav.ToBaseRelativePath(_Nav.Uri);
+        return href == "/" ? current == "" : current.StartsWith(href.TrimStart('/'));
+    }
+}

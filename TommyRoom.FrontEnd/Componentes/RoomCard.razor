@@ -1,0 +1,43 @@
+<div class="tr-room-card" @onclick="OnClick">
+    <div class="tr-room-card__img">
+        @if (!string.IsNullOrEmpty(Room.Photo))
+        {
+            <img src="@Room.Photo" alt="@Room.Name" class="tr-room-card__photo" />
+        }
+        else
+        {
+            <div class="tr-room-card__photo-placeholder"></div>
+        }
+        <span class="tr-badge @(Room.IsAvailable ? "tr-badge--gold" : "tr-badge--muted")">
+            @(Room.IsAvailable ? "Available" : "Booked")
+        </span>
+    </div>
+
+    <div class="tr-room-card__body">
+        <div class="tr-room-card__location">@Room.Location</div>
+        <div class="tr-room-card__name">@Room.Name</div>
+        @if (!string.IsNullOrEmpty(Room.Description))
+        {
+            <div class="tr-room-card__desc">
+                @(Room.Description.Length > 60 ? Room.Description[..60] + "…" : Room.Description)
+            </div>
+        }
+        <div class="tr-room-card__footer">
+            <div class="tr-room-card__price">
+                $@Room.PricePerNight<span>/night</span>
+            </div>
+            <a href="/rooms/@Room.Id" class="tr-btn tr-btn--outline tr-btn--sm">View</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Room Room { get; set; } = default!;
+    [Parameter] public EventCallback<Room> OnCardClick { get; set; }
+
+    private async Task OnClick()
+    {
+        if (OnCardClick.HasDelegate)
+            await OnCardClick.InvokeAsync(Room);
+    }
+}

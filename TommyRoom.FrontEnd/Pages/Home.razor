@@ -1,0 +1,156 @@
+﻿@page "/"
+@inject HttpClient Http
+
+<PageTitle>TommyRoom — Find Your Perfect Room</PageTitle>
+
+<!-- HERO -->
+<section class="tr-hero">
+    <div class="tr-hero__content">
+        <div class="tr-overline">Premium Stays</div>
+        <h1 class="tr-hero__title">Find Your Perfect<br /><em>Room</em></h1>
+        <p class="tr-hero__subtitle">Curated spaces for the discerning traveller</p>
+        <div class="tr-hero__cta">
+            <a href="#rooms" class="tr-btn tr-btn--primary">Explore Rooms</a>
+            <a href="/about" class="tr-btn tr-btn--outline">Learn More</a>
+        </div>
+    </div>
+</section>
+
+<!-- SEARCH BAR -->
+<div class="tr-search">
+    <div class="tr-search__field">
+        <span class="tr-search__label">Location</span>
+        <input class="tr-search__input" type="text" placeholder="Buenos Aires"
+               @bind="_searchLocation" @bind:event="oninput" />
+    </div>
+    <div class="tr-search__field">
+        <span class="tr-search__label">Check-in</span>
+        <input class="tr-search__input" type="date" @bind="_checkIn" />
+    </div>
+    <div class="tr-search__field tr-search__field--last">
+        <span class="tr-search__label">Check-out</span>
+        <input class="tr-search__input" type="date" @bind="_checkOut" />
+    </div>
+    <button class="tr-search__btn" @onclick="ApplySearch">Search</button>
+</div>
+
+<!-- ROOMS SECTION -->
+<section id="rooms" class="tr-rooms">
+    <div class="tr-rooms__header">
+        <div>
+            <h2 class="tr-rooms__title">Available Rooms</h2>
+            <p class="tr-rooms__count">@FilteredRooms.Count() room@(FilteredRooms.Count() != 1 ? "s" : "") found</p>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tr-tabs">
+        <button class="tr-tab @(_activeTab == "all" ? "tr-tab--active" : "")"
+                @onclick='() => SetTab("all")'>
+            All
+        </button>
+        <button class="tr-tab @(_activeTab == "available" ? "tr-tab--active" : "")"
+                @onclick='() => SetTab("available")'>
+            Available
+        </button>
+        <button class="tr-tab @(_activeTab == "price-asc" ? "tr-tab--active" : "")"
+                @onclick='() => SetTab("price-asc")'>
+            Price: Low to High
+        </button>
+        <button class="tr-tab @(_activeTab == "price-desc" ? "tr-tab--active" : "")"
+                @onclick='() => SetTab("price-desc")'>
+            Price: High to Low
+        </button>
+    </div>
+
+    <!-- GRID -->
+    @if (_loading)
+    {
+        <div class="tr-rooms__grid">
+            @for (int i = 0; i < 6; i++)
+            {
+                <div class="tr-room-card tr-room-card--skeleton">
+                    <div class="tr-room-card__img tr-skeleton"></div>
+                    <div class="tr-room-card__body">
+                        <div class="tr-skeleton tr-skeleton--line tr-skeleton--short"></div>
+                        <div class="tr-skeleton tr-skeleton--line"></div>
+                        <div class="tr-skeleton tr-skeleton--line tr-skeleton--medium"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (!FilteredRooms.Any())
+    {
+        <div class="tr-empty">
+            <div class="tr-empty__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+            </div>
+            <div class="tr-empty__title">No rooms found</div>
+            <div class="tr-empty__sub">Try adjusting your search filters</div>
+        </div>
+    }
+    else
+    {
+        <div class="tr-rooms__grid">
+            @foreach (var room in FilteredRooms)
+            {
+                <RoomCard Room="room" />
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private List<Room> _rooms = new();
+    private bool _loading = true;
+    private string _activeTab = "all";
+    private string _searchLocation = "";
+    private DateTime? _checkIn;
+    private DateTime? _checkOut;
+
+    private IEnumerable<Room> FilteredRooms
+    {
+        get
+        {
+            var query = _rooms.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(_searchLocation))
+                query = query.Where(r => r.Location != null &&
+                    r.Location.Contains(_searchLocation, StringComparison.OrdinalIgnoreCase));
+
+            query = _activeTab switch
+            {
+                "available" => query.Where(r => r.IsAvailable),
+                "price-asc" => query.OrderBy(r => r.PricePerNight),
+                "price-desc" => query.OrderByDescending(r => r.PricePerNight),
+                _ => query
+            };
+
+            return query;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _rooms = await Http.GetFromJsonAsync<List<Room>>("api/Rooms/OnlyAvilable") ?? new();
+        }
+        catch
+        {
+            _rooms = new();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void SetTab(string tab) => _activeTab = tab;
+
+    private void ApplySearch() => StateHasChanged();
+}
