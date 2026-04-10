@@ -1,0 +1,174 @@
+﻿@page "/register"
+@layout AuthLayout
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Register — TommyRoom</PageTitle>
+
+<div class="reg-wrap">
+
+    <!-- Lado izquierdo -->
+    <div class="reg-left">
+        <div class="reg-left__content">
+            <a href="/" class="reg-logo">Tommy<span>Room</span></a>
+            <div class="reg-left__quote">
+                <p>"A room without books is like<br />a body without a soul."</p>
+                <span>— Marcus Tullius Cicero</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lado derecho: formulario -->
+    <div class="reg-right">
+        <div class="reg-form-wrap">
+
+            <div class="reg-form__header">
+                <div class="tr-overline">Join us</div>
+                <h1 class="reg-form__title">Create your<br />account</h1>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <div class="reg-error">@_error</div>
+            }
+
+            <div class="reg-field">
+                <label class="reg-label">Full Name</label>
+                <input class="reg-input" type="text" placeholder="John Doe"
+                       @bind="_fullName" @onkeydown="HandleKeyDown" />
+            </div>
+
+            <div class="reg-field">
+                <label class="reg-label">Email</label>
+                <input class="reg-input" type="email" placeholder="you@email.com"
+                       @bind="_email" @onkeydown="HandleKeyDown" />
+            </div>
+
+            <div class="reg-field">
+                <label class="reg-label">Phone <span class="reg-optional">(optional)</span></label>
+                <input class="reg-input" type="tel" placeholder="+54 11 0000-0000"
+                       @bind="_phone" @onkeydown="HandleKeyDown" />
+            </div>
+
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label class="reg-label">Password</label>
+                    <input class="reg-input" type="password" placeholder="••••••••"
+                           @bind="_password" @onkeydown="HandleKeyDown" />
+                </div>
+                <div class="reg-field">
+                    <label class="reg-label">Confirm password</label>
+                    <input class="reg-input @(_passwordMismatch ? "reg-input--error" : "")"
+                           type="password" placeholder="••••••••"
+                           @bind="_confirmPassword" @onkeydown="HandleKeyDown" />
+                    @if (_passwordMismatch)
+                    {
+                        <span class="reg-field__hint">Passwords don't match</span>
+                    }
+                </div>
+            </div>
+
+            <button class="tr-btn tr-btn--primary reg-submit"
+                    @onclick="HandleRegister"
+                    disabled="@_loading">
+                @if (_loading)
+                {
+                    <span class="reg-spinner"></span>
+                    <span>Creating account…</span>
+                }
+                else
+                {
+                    <span>Create Account</span>
+                }
+            </button>
+
+            <div class="reg-divider">
+                <div class="tr-divider">
+                    <div class="tr-divider__line"></div>
+                    <div class="tr-divider__diamond"></div>
+                    <div class="tr-divider__line"></div>
+                </div>
+            </div>
+
+            <p class="reg-login">
+                Already a member? <a href="/login">Sign in</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _fullName = "";
+    private string _email = "";
+    private string _phone = "";
+    private string _password = "";
+    private string _confirmPassword = "";
+    private bool _loading;
+    private string _error = "";
+    private bool _passwordMismatch;
+
+    private async Task HandleRegister()
+    {
+        _error = "";
+        _passwordMismatch = false;
+
+        if (string.IsNullOrWhiteSpace(_fullName) ||
+            string.IsNullOrWhiteSpace(_email) ||
+            string.IsNullOrWhiteSpace(_password))
+        {
+            _error = "Please fill in all required fields.";
+            return;
+        }
+
+        if (_password != _confirmPassword)
+        {
+            _passwordMismatch = true;
+            return;
+        }
+
+        _loading = true;
+
+        try
+        {
+            var dto = new UserDTO
+            {
+                FullName = _fullName,
+                Email = _email,
+                PhoneNumber = _phone,
+                Password = _password,
+                UserType = UserType.User
+            };
+
+            var response = await Http.PostAsJsonAsync("api/Accounts/CreateUser", dto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadFromJsonAsync<TokenDTO>();
+                // await ((CustomAuthStateProvider)AuthStateProvider).LoginAsync(token!.Token);
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                _error = string.IsNullOrWhiteSpace(msg)
+                    ? "Something went wrong. Please try again."
+                    : msg.Trim('"');
+            }
+        }
+        catch
+        {
+            _error = "Connection error. Please try again.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await HandleRegister();
+    }
+}

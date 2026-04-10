@@ -1,15 +1,15 @@
 ﻿/* ══════════════════════════════════════════════════════════
-   ROOM DETAIL — agregar al final de tommyroom.css
+   ROOM DETAIL v2 — agregar en index.html después de tommyroom.css
+   <link href="css/tommyroom-detail.css" rel="stylesheet" />
 ══════════════════════════════════════════════════════════ */
 
-/* Breadcrumb */
+/* ── Breadcrumb ────────────────────────────────────────── */
 .tr-breadcrumb {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 14px clamp(16px, 4vw, 48px);
+    padding: 14px clamp(16px, 4vw, 48px) 10px;
     font-size: 11px;
-    color: var(--tr-tx-d);
 }
 
 .tr-breadcrumb__link {
@@ -32,94 +32,120 @@
     color: var(--tr-tx-m);
 }
 
-/* Gallery */
-.tr-gallery {
-    position: relative;
+/* ── Page wrapper ──────────────────────────────────────── */
+.tr-detail-page {
+    padding: 0 clamp(16px, 4vw, 48px) 60px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BODY: gallery (izq) + content (der)
+══════════════════════════════════════════════════════════ */
+.tr-detail-body {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px;
+    align-items: start;
+    margin-bottom: 0;
+}
+
+/* ══════════════════════════════════════════════════════════
+   GALLERY
+══════════════════════════════════════════════════════════ */
+.tr-detail-gallery {
     display: flex;
-    justify-content: flex-end;
-    width: auto;
-    height: 40rem;
-    margin: 0 clamp(16px, 4vw, 48px) 0;
+    gap: 10px;
+    /* Foto grande + thumbs apilados lado a lado */
+}
+
+/* Foto principal */
+.tr-detail-gallery__main {
+    width: 360px;
+    height: 360px;
     border-radius: var(--tr-rl);
     overflow: hidden;
+    flex-shrink: 0;
+    background: var(--tr-s2);
 }
 
-    .tr-gallery .tr-gallery-visualizador {
-        width: 40%;
-    }
-
-        .tr-gallery__main {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .tr-gallery:hover .tr-gallery__main {
-            transform: scale(1.02);
-        }
-
-        .tr-gallery__placeholder {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #141208 0%, #201e14 50%, #141208 100%);
-        }
-
-        .tr-gallery__badge {
-    position: absolute;
-    bottom: 14px;
-    left: 14px;
+.tr-detail-gallery__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
 }
 
-    .tr-gallery .tr-gallery-rigth {
-        display: flex;
-        flex-direction: column;
-        width: 60%;
-        padding: 2rem;
-    }
+.tr-detail-gallery__main:hover .tr-detail-gallery__img {
+    transform: scale(1.03);
+}
 
-.tr-gallery-rigth .tr-gallery-rigth-frist {
+.tr-detail-gallery__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #141208 0%, #201e14 55%, #141208 100%);
+}
+
+/* Columna de thumbnails apilados */
+.tr-detail-gallery__thumbs {
     display: flex;
-    padding: 2rem;
-    gap: 2rem;
+    flex-direction: column;
+    gap: 10px;
 }
 
-    .tr-gallery-rigth-frist .tr-gallery-rigth-one {
+.tr-detail-gallery__thumb {
+    width: 100px;
+    height: 110px;
+    border-radius: var(--tr-rl);
+    overflow: hidden;
+    cursor: pointer;
+    border: 0.5px solid var(--tr-bdr-s);
+    transition: border-color 0.2s, opacity 0.2s;
+    opacity: 0.6;
+    flex-shrink: 0;
+    background: var(--tr-s2);
+}
+
+    .tr-detail-gallery__thumb:hover {
+        opacity: 0.85;
     }
 
-    .tr-gallery-rigth-frist .tr-gallery-rigth-secont {
-    }
-
-.tr-gallery-rigth .tr-gallery-rigth-tree {
-
+.tr-detail-gallery__thumb--active {
+    border-color: var(--tr-gold);
+    opacity: 1;
 }
 
-
-/* Detail layout */
-.tr-detail-layout {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 40px;
-    padding: 32px clamp(16px, 4vw, 48px) 60px;
-    align-items: start;
-    background: red;
+.tr-detail-gallery__thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* Detail info */
+.tr-detail-gallery__thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #141208, #1c1a10);
+}
+
+/* ══════════════════════════════════════════════════════════
+   CONTENT (info + booking)
+══════════════════════════════════════════════════════════ */
+.tr-detail-content {
+    padding-top: 4px;
+}
+
 .tr-detail-title {
     font-family: var(--tr-fd);
-    font-size: clamp(28px, 4vw, 42px);
+    font-size: clamp(28px, 3.5vw, 46px);
     font-weight: 300;
     color: var(--tr-tx);
-    margin-bottom: 12px;
-    line-height: 1.1;
+    margin-bottom: 10px;
+    line-height: 1.05;
 }
 
 .tr-detail-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
-    margin-bottom: 4px;
+    margin-bottom: 12px;
 }
 
 .tr-detail-meta__item {
@@ -131,38 +157,39 @@
 }
 
 .tr-detail-desc {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--tr-tx-m);
-    line-height: 1.75;
-    margin-bottom: 24px;
+    line-height: 1.7;
+    margin-bottom: 18px;
 }
 
-.tr-detail-section-title {
+.tr-detail-section-label {
     font-size: 9px;
     font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--tr-gold);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 /* Amenities */
 .tr-amenities {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 28px;
+    gap: 7px;
+    margin-bottom: 0;
 }
 
 .tr-amenity {
-    background: var(--tr-s2);
+    background: transparent;
     border: 0.5px solid var(--tr-bdr-s);
     border-radius: var(--tr-r);
     padding: 5px 12px;
     font-size: 11px;
     color: var(--tr-tx-m);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
 }
 
     .tr-amenity:hover {
@@ -170,7 +197,11 @@
         color: var(--tr-tx);
     }
 
-/* Host */
+/* ── Host bar ──────────────────────────────────────────── */
+.tr-detail-host-bar {
+    padding-top: 32px;
+}
+
 .tr-host {
     display: flex;
     align-items: center;
@@ -178,8 +209,8 @@
 }
 
 .tr-host__avatar {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: var(--tr-s2);
     border: 0.5px solid var(--tr-bdr);
@@ -201,8 +232,9 @@
 
 .tr-host__name {
     font-family: var(--tr-fd);
-    font-size: 16px;
+    font-size: 17px;
     color: var(--tr-tx);
+    margin-bottom: 2px;
 }
 
 .tr-host__label {
@@ -210,53 +242,70 @@
     color: var(--tr-tx-m);
 }
 
-/* Visibility helpers */
-.tr-booking-widget--mobile {
-    display: none;
+/* Skeleton helpers para detail */
+.tr-detail-gallery__main.tr-skeleton {
+    border-radius: var(--tr-rl);
 }
 
-.tr-booking-widget--desktop {
-    display: block;
+.tr-detail-gallery__thumb.tr-skeleton {
+    border-radius: var(--tr-rl);
 }
-
-
 
 /* ══════════════════════════════════════════════════════════
-   RESPONSIVE — Detail
+   RESPONSIVE
 ══════════════════════════════════════════════════════════ */
-@media (max-width: 900px) {
-    .tr-detail-layout {
+
+/* Tablet: galería encima, content abajo */
+@media (max-width: 960px) {
+    .tr-detail-body {
         grid-template-columns: 1fr;
-        gap: 0;
-        padding-bottom: 40px;
+        gap: 24px;
     }
 
-    .tr-booking-widget--desktop {
-        display: none;
+    .tr-detail-gallery {
+        flex-direction: row;
+        justify-content: center;
     }
 
-    .tr-booking-widget--mobile {
-        display: block;
-        margin: 24px 0;
+    .tr-detail-gallery__main {
+        width: 100%;
+        height: 260px;
+        flex: 1;
     }
 
-    .tr-bw {
-        position: static;
+    .tr-detail-gallery__thumbs {
+        flex-direction: column;
     }
 
-    .tr-gallery {
-        aspect-ratio: 4 / 3;
-        margin: 0 16px;
+    .tr-detail-gallery__thumb {
+        width: 80px;
+        height: 84px;
     }
 }
 
-@media (max-width: 640px) {
-    .tr-gallery {
-        margin: 0 16px;
-        aspect-ratio: 1 / 1;
+/* Mobile: foto 16:9, thumbs en fila horizontal debajo */
+@media (max-width: 600px) {
+    .tr-detail-gallery {
+        flex-direction: column;
+        gap: 8px;
     }
 
-    .tr-detail-layout {
-        padding: 20px 16px 40px;
+    .tr-detail-gallery__main {
+        height: auto;
+        aspect-ratio: 4 / 3;
+    }
+
+    .tr-detail-gallery__thumbs {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .tr-detail-gallery__thumb {
+        width: 80px;
+        height: 60px;
+    }
+
+    .tr-detail-page {
+        padding: 0 16px 48px;
     }
 }

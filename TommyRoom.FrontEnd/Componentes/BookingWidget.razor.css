@@ -5,7 +5,8 @@
     background: var(--tr-s1);
     border: 0.5px solid var(--tr-bdr);
     border-radius: var(--tr-rl);
-    padding: 22px;
+    padding: 20px 22px;
+    max-width: 340px;
     position: sticky;
     top: calc(var(--tr-nav-h) + 16px);
 }

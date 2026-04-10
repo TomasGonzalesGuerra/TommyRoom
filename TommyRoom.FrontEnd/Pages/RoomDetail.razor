@@ -1,20 +1,30 @@
 @page "/rooms/{RoomId:int}"
-@inject HttpClient _Http
+@inject HttpClient Http
+@inject NavigationManager Nav
 
 <PageTitle>@(_room?.Name ?? "Room") — TommyRoom</PageTitle>
 
 @if (_loading)
 {
-    <div class="tr-detail-skeleton">
-        <div class="tr-skeleton tr-skeleton--gallery"></div>
-        <div class="tr-detail-layout">
-            <div class="tr-detail-info">
-                <div class="tr-skeleton tr-skeleton--line tr-skeleton--short" style="margin:0 0 10px;"></div>
-                <div class="tr-skeleton tr-skeleton--line" style="height:32px;margin:0 0 14px;width:60%;"></div>
-                <div class="tr-skeleton tr-skeleton--line" style="margin:0 0 8px;"></div>
-                <div class="tr-skeleton tr-skeleton--line" style="width:80%;"></div>
+    <div class="tr-detail-page">
+        <div class="tr-breadcrumb">
+            <span class="tr-breadcrumb__link">← Back to rooms</span>
+        </div>
+        <div class="tr-detail-body">
+            <div class="tr-detail-gallery">
+                <div class="tr-skeleton tr-detail-gallery__main"></div>
+                <div class="tr-detail-gallery__thumbs">
+                    <div class="tr-skeleton tr-detail-gallery__thumb"></div>
+                    <div class="tr-skeleton tr-detail-gallery__thumb"></div>
+                    <div class="tr-skeleton tr-detail-gallery__thumb"></div>
+                </div>
             </div>
-            <div class="tr-skeleton" style="height:280px;border-radius:4px;"></div>
+            <div class="tr-detail-content">
+                <div class="tr-skeleton tr-skeleton--line tr-skeleton--short" style="margin-bottom:12px;"></div>
+                <div class="tr-skeleton tr-skeleton--line" style="height:40px;width:55%;margin-bottom:20px;"></div>
+                <div class="tr-skeleton tr-skeleton--line" style="width:80%;margin-bottom:8px;"></div>
+                <div class="tr-skeleton" style="height:180px;border-radius:4px;margin-top:24px;"></div>
+            </div>
         </div>
     </div>
 }
@@ -23,9 +33,9 @@ else if (_room is null)
     <div class="tr-empty" style="padding:100px 20px;">
         <div class="tr-empty__icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
         </div>
         <div class="tr-empty__title">Room not found</div>
@@ -35,145 +45,160 @@ else if (_room is null)
 }
 else
 {
-    <!-- BREADCRUMB -->
-    <div class="tr-breadcrumb">
-        <a href="/" class="tr-breadcrumb__link">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polyline points="15 18 9 12 15 6"/>
-            </svg>
-            Back to rooms
-        </a>
-        <span class="tr-breadcrumb__sep">·</span>
-        <span class="tr-breadcrumb__current">@_room.Name</span>
-    </div>
+    <div class="tr-detail-page">
 
-    <!-- GALLERY -->
-    <div class="tr-gallery">
-        <div class="tr-gallery-visualizador">
-            @if (!string.IsNullOrEmpty(_room.Photo))
-            {
-                <img src="@_room.Photo" alt="@_room.Name" class="tr-gallery__main" />
-            }
-            else
-            {
-                <div class="tr-gallery__placeholder"></div>
-            }
-            <span class="tr-badge @(_room.IsAvailable ? "tr-badge--gold" : "tr-badge--muted") tr-gallery__badge">
-                @(_room.IsAvailable ? "Available" : "Booked")
-            </span>
+        <!-- BREADCRUMB -->
+        <div class="tr-breadcrumb">
+            <a href="/" class="tr-breadcrumb__link">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Back to rooms
+            </a>
+            <span class="tr-breadcrumb__sep">›</span>
+            <span class="tr-breadcrumb__current">@_room.Name</span>
         </div>
 
-        <div class="tr-gallery-rigth">
-            <div class="tr-gallery-rigth-frist">
-                <div class="tr-gallery-rigth-one">
-                    <div class="tr-overline">@_room.Location</div>
-                    <h1 class="tr-detail-title">@_room.Name</h1>
+        <!-- MAIN BODY: galería izquierda | info+booking derecha -->
+        <div class="tr-detail-body">
 
-                    <div class="tr-detail-meta">
-                        <div class="tr-detail-meta__item">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                            </svg>
-                            @_room.Location
-                        </div>
-                        <div class="tr-detail-meta__item">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                            </svg>
-                            Up to @_room.Capacity guest@(_room.Capacity != 1 ? "s" : "")
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tr-gallery-rigth-secont">
-                    <p class="tr-detail-desc">@_room.Description</p>
-
-                    <!-- AMENITIES -->
-                    <div class="tr-detail-section-title">Amenities</div>
-                    <div class="tr-amenities">
-                        <span class="tr-amenity">WiFi</span>
-                        <span class="tr-amenity">Air Conditioning</span>
-                        <span class="tr-amenity">Private Bathroom</span>
-                        <span class="tr-amenity">Daily Cleaning</span>
-                        @if (_room.Capacity >= 2)
-                        {
-                            <span class="tr-amenity">King Bed</span>
-                        }
-                        @if (_room.PricePerNight >= 100)
-                        {
-                            <span class="tr-amenity">Mini Bar</span>
-                            <span class="tr-amenity">City View</span>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <div class="tr-gallery-rigth-tree">
-                <!-- BOOKING INFO MOBILE -->
-                <div class="tr-booking-widget tr-booking-widget--mobile">
-                    <BookingWidget Room="_room" />
-                </div>
-
-                <!-- BOOKING WIDGET DESKTOP -->
-                <div class="tr-booking-widget tr-booking-widget--desktop">
-                    <BookingWidget Room="_room" />
-                </div>
-            </div>
-
-            <!-- INFO -->
-            <div class="tr-detail-info">
-
-                <div class="tr-divider" style="margin:20px 0;"><div class="tr-divider__line"></div><div class="tr-divider__diamond"></div><div class="tr-divider__line"></div></div>
-
-                
-
-                <div class="tr-divider" style="margin:28px 0 20px;"><div class="tr-divider__line"></div><div class="tr-divider__diamond"></div><div class="tr-divider__line"></div></div>
-                
-            </div>
-        </div>
-    </div>
-
-    <!-- DETAIL LAYOUT -->
-    <div class="tr-detail-layout">
-        <!-- OWNER -->
-        @if (_room.User is not null)
-        {
-            <div class="tr-detail-section-title">Hosted by</div>
-
-            <div class="tr-host">
-                <div class="tr-host__avatar">
-                    @if (!string.IsNullOrEmpty(_room.User.Photo))
+            <!-- GALLERY: foto grande + 3 thumbnails apilados -->
+            <div class="tr-detail-gallery">
+                <div class="tr-detail-gallery__main">
+                    @if (!string.IsNullOrEmpty(_room.Photo))
                     {
-                        <img src="@_room.User.Photo" alt="@_room.User.FullName" />
+                        <img src="@_room.Photo" alt="@_room.Name" class="tr-detail-gallery__img" />
                     }
                     else
                     {
-                        <span>@(_room.User.FullName?[..1] ?? "?")</span>
+                        <div class="tr-detail-gallery__placeholder"></div>
                     }
                 </div>
-                <div>
-                    <div class="tr-host__name">@_room.User.FullName</div>
-                    <div class="tr-host__label">Host</div>
+                <div class="tr-detail-gallery__thumbs">
+                    @for (int i = 0; i < 3; i++)
+                    {
+                        var idx = i;
+                        <div class="tr-detail-gallery__thumb @(_activeThumb == idx ? "tr-detail-gallery__thumb--active" : "")"
+                             @onclick="() => _activeThumb = idx">
+                            @if (!string.IsNullOrEmpty(_room.Photo))
+                            {
+                                <img src="@_room.Photo" alt="View @(idx + 1)" class="tr-detail-gallery__thumb-img" />
+                            }
+                            else
+                            {
+                                <div class="tr-detail-gallery__thumb-placeholder"></div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- INFO + BOOKING -->
+            <div class="tr-detail-content">
+
+                <!-- Ubicación + título + meta -->
+                <div class="tr-overline" style="margin-bottom:6px;">@_room.Location</div>
+                <h1 class="tr-detail-title">@_room.Name</h1>
+
+                <div class="tr-detail-meta">
+                    <span class="tr-detail-meta__item">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                        </svg>
+                        @_room.Location
+                    </span>
+                    <span class="tr-detail-meta__item">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        Up to @_room.Capacity guest@(_room.Capacity != 1 ? "s" : "")
+                    </span>
+                </div>
+
+                <!-- Descripción -->
+                @if (!string.IsNullOrEmpty(_room.Description))
+                {
+                    <p class="tr-detail-desc">@_room.Description</p>
+                }
+
+                <!-- Amenities -->
+                <div class="tr-detail-section-label">Amenities</div>
+                <div class="tr-amenities">
+                    <span class="tr-amenity">WiFi</span>
+                    <span class="tr-amenity">Air Conditioning</span>
+                    <span class="tr-amenity">Private Bathroom</span>
+                    <span class="tr-amenity">Daily Cleaning</span>
+                    @if (_room.Capacity >= 2)
+                    {
+                        <span class="tr-amenity">King Bed</span>
+                    }
+                    @if (_room.PricePerNight >= 100)
+                    {
+                        <span class="tr-amenity">Mini Bar</span>
+                        <span class="tr-amenity">City View</span>
+     }
+                </div>
+
+                <!-- Divider dorado -->
+                <div class="tr-divider" style="margin:20px 0;">
+                    <div class="tr-divider__line"></div>
+                    <div class="tr-divider__diamond"></div>
+                    <div class="tr-divider__line"></div>
+                </div>
+
+                <!-- Booking widget inline -->
+                <BookingWidget Room="_room" />
+
+            </div>
+        </div>
+
+        <!-- HOST BAR -->
+        @if (_room.User is not null)
+        {
+            <div class="tr-detail-host-bar">
+                <div class="tr-divider" style="margin-bottom:28px;">
+                    <div class="tr-divider__line"></div>
+                    <div class="tr-divider__diamond"></div>
+                    <div class="tr-divider__line"></div>
+                </div>
+                <div class="tr-detail-section-label" style="margin-bottom:14px;">Hosted by</div>
+                <div class="tr-host">
+                    <div class="tr-host__avatar">
+                        @if (!string.IsNullOrEmpty(_room.User.Photo))
+                        {
+                            <img src="@_room.User.Photo" alt="@_room.User.FullName" />
+                        }
+                        else
+                        {
+                            <span>@(_room.User.FullName?[..1] ?? "?")</span>
+                        }
+                    </div>
+                    <div>
+                        <div class="tr-host__name">@_room.User.FullName</div>
+                        <div class="tr-host__label">Host</div>
+                    </div>
                 </div>
             </div>
         }
+
     </div>
 }
 
 @code {
     [Parameter] public int RoomId { get; set; }
 
-    private Room? _room = new();
+    private Room? _room;
     private bool _loading = true;
+    private int _activeThumb = 0;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _room = await _Http.GetFromJsonAsync<Room>($"api/Rooms/{RoomId}");
+            _room = await Http.GetFromJsonAsync<Room>($"api/Rooms/{RoomId}");
         }
         catch
         {

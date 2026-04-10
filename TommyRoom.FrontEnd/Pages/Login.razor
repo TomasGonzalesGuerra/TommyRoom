@@ -1,0 +1,138 @@
+﻿@page "/login"
+@layout AuthLayout
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Sign In — TommyRoom</PageTitle>
+
+<div class="login-wrap">
+
+    <!-- Lado izquierdo: imagen/quote -->
+    <div class="login-left">
+        <div class="login-left__content">
+            <a href="/" class="login-logo">Tommy<span>Room</span></a>
+            <div class="login-left__quote">
+                <p>"Travel is the only thing you buy<br />that makes you richer."</p>
+                <span>— Anonymous</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lado derecho: formulario -->
+    <div class="login-right">
+        <div class="login-form-wrap">
+
+            <div class="login-form__header">
+                <div class="tr-overline">Welcome back</div>
+                <h1 class="login-form__title">Sign in to<br />your account</h1>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <div class="login-error">@_error</div>
+            }
+
+            <div class="login-field">
+                <label class="login-label">Email</label>
+                <input class="login-input"
+                       type="email"
+                       placeholder="you@email.com"
+                       @bind="_email"
+                       @onkeydown="HandleKeyDown" />
+            </div>
+
+            <div class="login-field">
+                <label class="login-label">Password</label>
+                <input class="login-input"
+                       type="password"
+                       placeholder="••••••••"
+                       @bind="_password"
+                       @onkeydown="HandleKeyDown" />
+                <a href="/forgot-password" class="login-forgot">Forgot password?</a>
+            </div>
+
+            <button class="tr-btn tr-btn--primary login-submit"
+                    @onclick="HandleLogin"
+                    disabled="@_loading">
+                @if (_loading)
+                {
+                    <span class="login-spinner"></span>
+                    <span>Signing in…</span>
+                }
+                else
+                {
+                    <span>Sign In</span>
+                }
+            </button>
+
+            <div class="login-divider">
+                <div class="tr-divider">
+                    <div class="tr-divider__line"></div>
+                    <div class="tr-divider__diamond"></div>
+                    <div class="tr-divider__line"></div>
+                </div>
+            </div>
+
+            <p class="login-register">
+                New here? <a href="/register">Create an account</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _email = "";
+    private string _password = "";
+    private bool _loading;
+    private string _error = "";
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private async Task HandleLogin()
+    {
+        _error = "";
+
+        if (string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
+        {
+            _error = "Please enter your email and password.";
+            return;
+        }
+
+        _loading = true;
+
+        try
+        {
+            var dto = new LoginDTO { Email = _email, Password = _password };
+            var response = await Http.PostAsJsonAsync("api/Accounts/Login", dto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadFromJsonAsync<TokenDTO>();
+                // Guardar token y notificar al AuthStateProvider
+                // Ejemplo: await ((CustomAuthStateProvider)AuthStateProvider).LoginAsync(token!.Token);
+                Nav.NavigateTo(ReturnUrl ?? "/");
+            }
+            else
+            {
+                _error = await response.Content.ReadAsStringAsync();
+                _error = _error.Trim('"');
+            }
+        }
+        catch
+        {
+            _error = "Connection error. Please try again.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await HandleLogin();
+    }
+}

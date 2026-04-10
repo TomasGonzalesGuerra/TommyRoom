@@ -1,0 +1,208 @@
+﻿@page "/my-bookings"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<PageTitle>My Bookings — TommyRoom</PageTitle>
+
+<div class="tr-mybk-page">
+
+    <div class="tr-mybk-header">
+        <div>
+            <div class="tr-overline">Your reservations</div>
+            <h1 class="tr-mybk-title">My Bookings</h1>
+        </div>
+        <a href="/" class="tr-btn tr-btn--outline tr-btn--sm">Browse Rooms</a>
+    </div>
+
+    <div class="tr-tabs" style="margin-bottom:28px;">
+        <button class="tr-tab @(_tab == "all" ? "tr-tab--active" : "")" @onclick='() => _tab = "all"'>All</button>
+        <button class="tr-tab @(_tab == "upcoming" ? "tr-tab--active" : "")" @onclick='() => _tab = "upcoming"'>Upcoming</button>
+        <button class="tr-tab @(_tab == "completed" ? "tr-tab--active" : "")" @onclick='() => _tab = "completed"'>Completed</button>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="tr-mybk-list">
+            @for (int i = 0; i < 3; i++)
+            {
+                <div class="tr-mybk-item">
+                    <div class="tr-skeleton tr-mybk-item__thumb"></div>
+                    <div style="flex:1;">
+                        <div class="tr-skeleton tr-skeleton--line tr-skeleton--short" style="margin-bottom:8px;"></div>
+                        <div class="tr-skeleton tr-skeleton--line" style="width:55%;"></div>
+                    </div>
+                    <div class="tr-skeleton" style="width:80px;height:36px;border-radius:2px;"></div>
+                </div>
+            }
+        </div>
+    }
+    else if (!FilteredBookings.Any())
+    {
+        <div class="tr-empty">
+            <div class="tr-empty__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+            </div>
+            <div class="tr-empty__title">No bookings yet</div>
+            <div class="tr-empty__sub" style="margin-bottom:20px;">
+                @(_tab == "all" ? "You haven't made any reservations." : $"No {_tab} reservations.")
+            </div>
+            <a href="/" class="tr-btn tr-btn--outline">Explore Rooms</a>
+        </div>
+    }
+    else
+    {
+        <div class="tr-mybk-list">
+            @foreach (var booking in FilteredBookings)
+            {
+                <div class="tr-mybk-item">
+                    <div class="tr-mybk-item__thumb">
+                        @if (!string.IsNullOrEmpty(booking.Room?.Photo))
+                        {
+                            <img src="@booking.Room.Photo" alt="@booking.Room.Name" class="tr-mybk-item__thumb-img" />
+                        }
+                        else
+                        {
+                            <div class="tr-mybk-item__thumb-placeholder"></div>
+                        }
+                    </div>
+
+                    <div class="tr-mybk-item__info">
+                        <div class="tr-mybk-item__location">@booking.Room?.Location</div>
+                        <div class="tr-mybk-item__name">@booking.Room?.Name</div>
+                        <div class="tr-mybk-item__dates">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            @booking.StartTime.ToString("MMM dd") – @booking.EndTime.ToString("MMM dd, yyyy")
+                            · @((booking.EndTime - booking.StartTime).Days) night@((booking.EndTime - booking.StartTime).Days != 1 ? "s" : "")
+                        </div>
+                    </div>
+
+                    <div class="tr-mybk-item__right">
+                        <div class="tr-mybk-item__price">$@booking.TotalPrice</div>
+                        <span class="tr-mybk-status @StatusClass(booking)">@StatusLabel(booking)</span>
+                        @if (IsUpcoming(booking))
+                        {
+                            <button class="tr-btn tr-btn--ghost tr-btn--sm" @onclick="() => ConfirmCancel(booking)">
+                                Cancel
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="/rooms/@booking.RoomId" class="tr-btn tr-btn--outline tr-btn--sm">Book again</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (!_loading && _bookings.Any())
+    {
+        <div class="tr-mybk-summary">
+            <div class="tr-divider" style="margin-bottom:24px;">
+                <div class="tr-divider__line"></div>
+                <div class="tr-divider__diamond"></div>
+                <div class="tr-divider__line"></div>
+            </div>
+            <div class="tr-mybk-summary__grid">
+                <div class="tr-mybk-stat">
+                    <div class="tr-mybk-stat__value">@_bookings.Count</div>
+                    <div class="tr-mybk-stat__label">Total bookings</div>
+                </div>
+                <div class="tr-mybk-stat">
+                    <div class="tr-mybk-stat__value">@_bookings.Count(IsUpcoming)</div>
+                    <div class="tr-mybk-stat__label">Upcoming</div>
+                </div>
+                <div class="tr-mybk-stat">
+                    <div class="tr-mybk-stat__value">$@_bookings.Sum(b => b.TotalPrice)</div>
+                    <div class="tr-mybk-stat__label">Total spent</div>
+                </div>
+                <div class="tr-mybk-stat">
+                    <div class="tr-mybk-stat__value">@_bookings.Sum(b => (b.EndTime - b.StartTime).Days)</div>
+                    <div class="tr-mybk-stat__label">Nights stayed</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (_cancelTarget is not null)
+{
+    <div class="tr-modal-overlay" @onclick="CloseModal">
+        <div class="tr-modal" @onclick:stopPropagation>
+            <div class="tr-modal__title">Cancel reservation?</div>
+            <div class="tr-modal__body">
+                You are about to cancel <strong>@_cancelTarget.Room?.Name</strong> —
+                @_cancelTarget.StartTime.ToString("MMM dd") to @_cancelTarget.EndTime.ToString("MMM dd, yyyy").
+                This action cannot be undone.
+            </div>
+            <div class="tr-modal__actions">
+                <button class="tr-btn tr-btn--ghost" @onclick="CloseModal">Keep it</button>
+                <button class="tr-btn tr-btn--danger" @onclick="ExecuteCancel" disabled="@_cancelling">
+                    @(_cancelling ? "Cancelling…" : "Yes, cancel")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Booking> _bookings = new();
+    private bool _loading = true;
+    private string _tab = "all";
+    private Booking? _cancelTarget;
+    private bool _cancelling;
+
+    private IEnumerable<Booking> FilteredBookings => _tab switch
+    {
+        "upcoming" => _bookings.Where(IsUpcoming),
+        "completed" => _bookings.Where(b => !IsUpcoming(b)),
+        _ => _bookings
+    };
+
+    private static bool IsUpcoming(Booking b) => b.EndTime >= DateTime.UtcNow;
+    private static string StatusLabel(Booking b) => IsUpcoming(b) ? "Upcoming" : "Completed";
+    private static string StatusClass(Booking b) => IsUpcoming(b) ? "tr-mybk-status--upcoming" : "tr-mybk-status--completed";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _bookings = await Http.GetFromJsonAsync<List<Booking>>("api/Bookings") ?? new();
+            _bookings = _bookings.OrderByDescending(b => b.StartTime).ToList();
+        }
+        catch { _bookings = new(); }
+        finally { _loading = false; }
+    }
+
+    private void ConfirmCancel(Booking b) => _cancelTarget = b;
+    private void CloseModal() => _cancelTarget = null;
+
+    private async Task ExecuteCancel()
+    {
+        if (_cancelTarget is null) return;
+        _cancelling = true;
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Bookings/{_cancelTarget.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                _bookings.Remove(_cancelTarget);
+                _cancelTarget = null;
+            }
+        }
+        catch { }
+        finally { _cancelling = false; }
+    }
+}

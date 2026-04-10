@@ -1,0 +1,291 @@
+﻿@page "/profile"
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+
+<PageTitle>Profile — TommyRoom</PageTitle>
+
+<div class="pf-page">
+
+    @if (_loading)
+    {
+        <div class="pf-header">
+            <div class="tr-skeleton pf-avatar"></div>
+            <div>
+                <div class="tr-skeleton tr-skeleton--line" style="width:160px;margin-bottom:8px;"></div>
+                <div class="tr-skeleton tr-skeleton--line tr-skeleton--short"></div>
+            </div>
+        </div>
+    }
+    else if (_user is not null)
+    {
+        <!-- HEADER -->
+        <div class="pf-header">
+            <div class="pf-avatar">
+                @if (!string.IsNullOrEmpty(_user.Photo))
+                {
+                    <img src="@_user.Photo" alt="@_user.FullName" class="pf-avatar__img" />
+                }
+                else
+                {
+                    <span class="pf-avatar__initials">@Initials(_user.FullName)</span>
+                }
+            </div>
+            <div class="pf-header__info">
+                <div class="tr-overline">Your account</div>
+                <h1 class="pf-title">@_user.FullName</h1>
+                <div class="pf-email">@_user.Email</div>
+            </div>
+            <div class="pf-header__actions">
+                @if (!_editing)
+                {
+                    <button class="tr-btn tr-btn--outline tr-btn--sm" @onclick="StartEdit">Edit Profile</button>
+                }
+                <button class="tr-btn tr-btn--ghost tr-btn--sm pf-signout" @onclick="SignOut">Sign Out</button>
+            </div>
+        </div>
+
+        <div class="tr-divider pf-divider">
+            <div class="tr-divider__line"></div>
+            <div class="tr-divider__diamond"></div>
+            <div class="tr-divider__line"></div>
+        </div>
+
+        @if (!_editing)
+        {
+            <!-- VIEW MODE -->
+            <div class="pf-grid">
+                <div class="pf-section">
+                    <div class="pf-section__title">Personal info</div>
+                    <div class="pf-fields">
+                        <div class="pf-field">
+                            <div class="pf-field__label">Full name</div>
+                            <div class="pf-field__value">@_user.FullName</div>
+                        </div>
+                        <div class="pf-field">
+                            <div class="pf-field__label">Email</div>
+                            <div class="pf-field__value">@_user.Email</div>
+                        </div>
+                        <div class="pf-field">
+                            <div class="pf-field__label">Phone</div>
+                            <div class="pf-field__value">@(_user.PhoneNumber ?? "—")</div>
+                        </div>
+                        <div class="pf-field">
+                            <div class="pf-field__label">Account type</div>
+                            <div class="pf-field__value">@_user.UserType.ToString()</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pf-section">
+                    <div class="pf-section__title">Security</div>
+                    <div class="pf-fields">
+                        @if (_showPasswordForm)
+                        {
+                            <div class="pf-field">
+                                <label class="pf-label">Current password</label>
+                                <input class="pf-input" type="password" @bind="_currentPassword" placeholder="••••••••" />
+                            </div>
+                            <div class="pf-field">
+                                <label class="pf-label">New password</label>
+                                <input class="pf-input" type="password" @bind="_newPassword" placeholder="••••••••" />
+                            </div>
+                            <div class="pf-field">
+                                <label class="pf-label">Confirm new password</label>
+                                <input class="pf-input @(_pwMismatch ? "pf-input--error" : "")"
+                                       type="password" @bind="_confirmNewPassword" placeholder="••••••••" />
+                            </div>
+                            @if (!string.IsNullOrEmpty(_pwError))
+                            {
+                                <div class="pf-error">@_pwError</div>
+                            }
+                            @if (_pwSuccess)
+                            {
+                                <div class="pf-success">Password updated successfully.</div>
+                            }
+                            <div class="pf-row-btns">
+                                <button class="tr-btn tr-btn--ghost tr-btn--sm" @onclick="() => _showPasswordForm = false">Cancel</button>
+                                <button class="tr-btn tr-btn--primary tr-btn--sm" @onclick="HandleChangePassword" disabled="@_pwLoading">
+                                    @(_pwLoading ? "Saving…" : "Update password")
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="pf-field">
+                                <div class="pf-field__label">Password</div>
+                                <div class="pf-field__value">••••••••</div>
+                            </div>
+                            <button class="tr-btn tr-btn--outline tr-btn--sm" style="margin-top:8px;"
+                                    @onclick="() => _showPasswordForm = true">
+                                Change Password
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- EDIT MODE -->
+            <div class="pf-edit-form">
+                <div class="pf-section__title" style="margin-bottom:20px;">Edit profile</div>
+
+                @if (!string.IsNullOrEmpty(_editError))
+                {
+                    <div class="pf-error">@_editError</div>
+                }
+
+                <div class="pf-edit-grid">
+                    <div class="pf-field">
+                        <label class="pf-label">Full name</label>
+                        <input class="pf-input" type="text" @bind="_editName" placeholder="John Doe" />
+                    </div>
+                    <div class="pf-field">
+                        <label class="pf-label">Phone</label>
+                        <input class="pf-input" type="tel" @bind="_editPhone" placeholder="+54 11 0000-0000" />
+                    </div>
+                </div>
+
+                <div class="pf-row-btns" style="margin-top:24px;">
+                    <button class="tr-btn tr-btn--ghost" @onclick="CancelEdit">Cancel</button>
+                    <button class="tr-btn tr-btn--primary" @onclick="HandleSave" disabled="@_saving">
+                        @(_saving ? "Saving…" : "Save changes")
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private User? _user;
+    private bool _loading = true;
+
+    // Edit profile
+    private bool _editing;
+    private string _editName = "";
+    private string _editPhone = "";
+    private bool _saving;
+    private string _editError = "";
+
+    // Change password
+    private bool _showPasswordForm;
+    private string _currentPassword = "";
+    private string _newPassword = "";
+    private string _confirmNewPassword = "";
+    private bool _pwLoading;
+    private string _pwError = "";
+    private bool _pwSuccess;
+    private bool _pwMismatch;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _user = await Http.GetFromJsonAsync<User>("api/Accounts/Profile");
+        }
+        catch { }
+        finally { _loading = false; }
+    }
+
+    private void StartEdit()
+    {
+        _editName = _user?.FullName ?? "";
+        _editPhone = _user?.PhoneNumber ?? "";
+        _editing = true;
+        _editError = "";
+    }
+
+    private void CancelEdit() => _editing = false;
+
+    private async Task HandleSave()
+    {
+        _editError = "";
+        if (string.IsNullOrWhiteSpace(_editName))
+        {
+            _editError = "Name cannot be empty.";
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var updated = _user! with { FullName = _editName, PhoneNumber = _editPhone };
+            var response = await Http.PutAsJsonAsync("api/Accounts", updated);
+            if (response.IsSuccessStatusCode)
+            {
+                _user!.FullName = _editName;
+                _user!.PhoneNumber = _editPhone;
+                _editing = false;
+            }
+            else
+            {
+                _editError = "Could not save changes. Please try again.";
+            }
+        }
+        catch { _editError = "Connection error."; }
+        finally { _saving = false; }
+    }
+
+    private async Task HandleChangePassword()
+    {
+        _pwError = "";
+        _pwSuccess = false;
+        _pwMismatch = false;
+
+        if (string.IsNullOrWhiteSpace(_currentPassword) || string.IsNullOrWhiteSpace(_newPassword))
+        {
+            _pwError = "Please fill in all password fields.";
+            return;
+        }
+        if (_newPassword != _confirmNewPassword)
+        {
+            _pwMismatch = true;
+            return;
+        }
+
+        _pwLoading = true;
+        try
+        {
+            var dto = new ChangePasswordDTO
+            {
+                CurrentPassword = _currentPassword,
+                NewPassword = _newPassword
+            };
+            var response = await Http.PostAsJsonAsync("api/Accounts/ChangePassword", dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _pwSuccess = true;
+                _currentPassword = "";
+                _newPassword = "";
+                _confirmNewPassword = "";
+            }
+            else
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                _pwError = string.IsNullOrWhiteSpace(msg) ? "Could not update password." : msg.Trim('"');
+            }
+        }
+        catch { _pwError = "Connection error."; }
+        finally { _pwLoading = false; }
+    }
+
+    private async Task SignOut()
+    {
+        // await ((CustomAuthStateProvider)AuthStateProvider).LogoutAsync();
+        Nav.NavigateTo("/login");
+    }
+
+    private static string Initials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length >= 2
+            ? $"{parts[0][0]}{parts[^1][0]}".ToUpper()
+            : parts[0][0].ToString().ToUpper();
+    }
+}
