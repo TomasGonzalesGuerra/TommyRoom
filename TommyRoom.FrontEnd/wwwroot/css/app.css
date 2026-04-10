@@ -196,132 +196,6 @@ button {
     flex-shrink: 0;
 }
 
-/* ══════════════════════════════════════════════════════════
-   NAVBAR
-══════════════════════════════════════════════════════════ */
-.tr-nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    height: var(--tr-nav-h);
-    background: rgba(10, 10, 10, 0.97);
-    backdrop-filter: blur(10px);
-    border-bottom: 0.5px solid var(--tr-bdr-s);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 clamp(16px, 4vw, 48px);
-    gap: 24px;
-}
-
-.tr-nav__logo {
-    font-family: var(--tr-fd);
-    font-size: 22px;
-    font-weight: 300;
-    letter-spacing: 0.1em;
-    color: var(--tr-tx);
-    flex-shrink: 0;
-}
-
-    .tr-nav__logo span {
-        color: var(--tr-gold);
-    }
-
-.tr-nav__links {
-    display: flex;
-    gap: 28px;
-    align-items: center;
-}
-
-.tr-nav__link {
-    font-size: 10px;
-    font-weight: 400;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--tr-tx-m);
-    transition: color 0.2s;
-}
-
-    .tr-nav__link:hover,
-    .tr-nav__link--active {
-        color: var(--tr-gold);
-    }
-
-.tr-nav__actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.tr-nav__icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--tr-s2);
-    border: 0.5px solid var(--tr-bdr-s);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--tr-tx-m);
-    transition: border-color 0.2s, color 0.2s;
-}
-
-    .tr-nav__icon:hover {
-        border-color: var(--tr-bdr);
-        color: var(--tr-gold);
-    }
-
-.tr-nav__ham {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    padding: 4px;
-}
-
-    .tr-nav__ham span {
-        display: block;
-        width: 20px;
-        height: 1px;
-        background: var(--tr-tx-m);
-        transition: background 0.2s;
-    }
-
-/* Mobile drawer */
-.tr-nav__drawer {
-    position: fixed;
-    top: var(--tr-nav-h);
-    left: 0;
-    right: 0;
-    background: var(--tr-s1);
-    border-bottom: 0.5px solid var(--tr-bdr);
-    padding: 20px clamp(16px, 4vw, 48px);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    z-index: 99;
-}
-
-.tr-nav__drawer-link {
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--tr-tx-m);
-    padding: 10px 0;
-    border-bottom: 0.5px solid var(--tr-bdr-s);
-    transition: color 0.2s;
-}
-
-    .tr-nav__drawer-link:hover {
-        color: var(--tr-gold);
-    }
-
-.tr-nav__drawer-divider {
-    height: 0.5px;
-    background: var(--tr-bdr);
-    margin: 8px 0;
-}
 
 /* ══════════════════════════════════════════════════════════
    BUTTONS
@@ -384,7 +258,8 @@ button {
 .tr-hero {
     min-height: 520px;
     display: flex;
-    align-items: center;
+    align-items
+        : center;
     justify-content: center;
     background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(201,168,76,0.05) 0%, transparent 70%), linear-gradient(160deg, #0a0a0a 0%, #141208 55%, #0a0a0a 100%);
     border-bottom: 0.5px solid var(--tr-bdr-s);
@@ -485,6 +360,7 @@ button {
     transition: background 0.2s;
 }
 
+
     .tr-search__btn:hover {
         background: var(--tr-gold-l);
     }
@@ -533,11 +409,11 @@ button {
     background: none;
     border: none;
     border-bottom: 1.5px solid transparent;
-    padding: 10px 18px;
+    padding: 6px 10px;
     font-family: var(--tr-fb);
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 500;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--tr-tx-m);
     white-space: nowrap;
@@ -925,6 +801,7 @@ button {
         gap: 4px;
     }
 }
+
 
 /* ══════════════════════════════════════════════════════════
    ROOM DETAIL — agregar al final de tommyroom.css

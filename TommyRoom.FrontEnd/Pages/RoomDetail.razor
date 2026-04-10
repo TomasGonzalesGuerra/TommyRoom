@@ -143,7 +143,7 @@ else
 @code {
     [Parameter] public int RoomId { get; set; }
 
-    private Room? _room;
+    private Room? _room = new();
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()

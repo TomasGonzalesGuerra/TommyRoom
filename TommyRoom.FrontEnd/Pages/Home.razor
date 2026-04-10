@@ -1,5 +1,6 @@
 ﻿@page "/"
-@inject HttpClient Http
+@inject HttpClient _Http
+@inject IJSRuntime _JS
 
 <PageTitle>TommyRoom — Find Your Perfect Room</PageTitle>
 
@@ -45,22 +46,11 @@
 
     <!-- TABS -->
     <div class="tr-tabs">
-        <button class="tr-tab @(_activeTab == "all" ? "tr-tab--active" : "")"
-                @onclick='() => SetTab("all")'>
-            All
-        </button>
-        <button class="tr-tab @(_activeTab == "available" ? "tr-tab--active" : "")"
-                @onclick='() => SetTab("available")'>
-            Available
-        </button>
-        <button class="tr-tab @(_activeTab == "price-asc" ? "tr-tab--active" : "")"
-                @onclick='() => SetTab("price-asc")'>
-            Price: Low to High
-        </button>
-        <button class="tr-tab @(_activeTab == "price-desc" ? "tr-tab--active" : "")"
-                @onclick='() => SetTab("price-desc")'>
-            Price: High to Low
-        </button>
+        <button class="tr-tab @(_activeTab == "all" ? "tr-tab--active" : "")" @onclick='() => SetTab("all")'>All</button>
+        <button class="tr-tab @(_activeTab == "available" ? "tr-tab--active" : "")" @onclick='() => SetTab("available")'>Available</button>
+        <button class="tr-tab @(_activeTab == "price-asc" ? "tr-tab--active" : "")" @onclick='() => SetTab("price-asc")'>Price ↑</button>
+        <button class="tr-tab @(_activeTab == "price-desc" ? "tr-tab--active" : "")" @onclick='() => SetTab("price-desc")'>Price ↓</button>
+        <button class="tr-tab @(_activeTab == "capacity" ? "tr-tab--active" : "")" @onclick='() => SetTab("capacity")'>Capacity</button>
     </div>
 
     <!-- GRID -->
@@ -104,6 +94,7 @@
     }
 </section>
 
+
 @code {
     private List<Room> _rooms = new();
     private bool _loading = true;
@@ -138,7 +129,7 @@
     {
         try
         {
-            _rooms = await Http.GetFromJsonAsync<List<Room>>("api/Rooms/OnlyAvilable") ?? new();
+            _rooms = await _Http.GetFromJsonAsync<List<Room>>("api/Rooms/OnlyAvilable") ?? new();
         }
         catch
         {
@@ -150,7 +141,11 @@
         }
     }
 
-    private void SetTab(string tab) => _activeTab = tab;
+    private async Task SetTab(string tab)
+    {
+        _activeTab = tab;
+        await _JS.InvokeVoidAsync("scrollToElement", "rooms-grid");
+    }
 
     private void ApplySearch() => StateHasChanged();
 }

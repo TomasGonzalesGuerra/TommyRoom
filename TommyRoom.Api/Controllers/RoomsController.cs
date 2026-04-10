@@ -11,7 +11,7 @@ namespace TommyRoom.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class RoomsController(DataContext dataContext, IUserHelper userHelper,IFileStorage fileStorage) : ControllerBase
 {
     private readonly DataContext _dataContext = dataContext;

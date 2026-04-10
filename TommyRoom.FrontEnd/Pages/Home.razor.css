@@ -1,0 +1,182 @@
+﻿/* ══════════════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════════════ */
+.tr-hero {
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(201,168,76,0.05) 0%, transparent 70%), linear-gradient(160deg, #0a0a0a 0%, #141208 55%, #0a0a0a 100%);
+    border-bottom: 0.5px solid var(--tr-bdr-s);
+    text-align: center;
+    padding: 80px clamp(16px, 6vw, 80px) 60px;
+}
+
+.tr-hero__title {
+    font-family: var(--tr-fd);
+    font-size: clamp(40px, 7vw, 72px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--tr-tx);
+    margin-bottom: 14px;
+}
+
+    .tr-hero__title em {
+        font-style: italic;
+        color: var(--tr-gold);
+    }
+
+.tr-hero__subtitle {
+    font-family: var(--tr-fd);
+    font-style: italic;
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--tr-tx-m);
+    margin-bottom: 36px;
+}
+
+.tr-hero__cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SEARCH BAR
+══════════════════════════════════════════════════════════ */
+.tr-search {
+    display: flex;
+    border: 0.5px solid var(--tr-bdr);
+    border-radius: var(--tr-r);
+    overflow: hidden;
+    margin: 28px clamp(16px, 4vw, 48px);
+    background: var(--tr-s1);
+}
+
+.tr-search__field {
+    flex: 1;
+    padding: 14px 18px;
+    border-right: 0.5px solid var(--tr-bdr-s);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.tr-search__field--last {
+    border-right: none;
+}
+
+.tr-search__label {
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tr-gold);
+}
+
+.tr-search__input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--tr-tx);
+    font-family: var(--tr-fb);
+    font-size: 12px;
+    font-weight: 300;
+    width: 100%;
+    color-scheme: dark;
+}
+
+    .tr-search__input::placeholder {
+        color: var(--tr-tx-m);
+    }
+
+.tr-search__btn {
+    background: var(--tr-gold);
+    border: none;
+    padding: 0 28px;
+    color: #0a0a0a;
+    font-family: var(--tr-fb);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+    .tr-search__btn:hover {
+        background: var(--tr-gold-l);
+    }
+
+/* ══════════════════════════════════════════════════════════
+   ROOMS SECTION
+══════════════════════════════════════════════════════════ */
+.tr-rooms {
+    padding: 0 clamp(16px, 4vw, 48px) 60px;
+}
+
+.tr-rooms__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 20px 0 12px;
+}
+
+.tr-rooms__title {
+    font-family: var(--tr-fd);
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--tr-tx);
+    margin-bottom: 2px;
+}
+
+.tr-rooms__count {
+    font-size: 11px;
+    color: var(--tr-tx-m);
+}
+
+/* ── Tabs ──────────────────────────────────────────────── */
+.tr-tabs {
+    display: flex;
+    border-bottom: 0.5px solid var(--tr-bdr-s);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+    .tr-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+.tr-tab {
+    background: none;
+    border: none;
+    border-bottom: 1.5px solid transparent;
+    padding: 6px 10px;
+    font-family: var(--tr-fb);
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--tr-tx-m);
+    white-space: nowrap;
+    margin-bottom: -0.5px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+    .tr-tab:hover {
+        color: var(--tr-tx);
+    }
+
+.tr-tab--active {
+    color: var(--tr-gold);
+    border-bottom-color: var(--tr-gold);
+}
+
+/* ── Room Grid ─────────────────────────────────────────── */
+.tr-rooms__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
