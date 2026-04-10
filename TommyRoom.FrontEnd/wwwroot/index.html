@@ -27,6 +27,16 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        const mainImg = document.querySelector('.main-photo img');
+        const thumbs = document.querySelectorAll('.thumbnails img');
+
+        thumbs.forEach(img => {
+            img.addEventListener('click', () => {
+                mainImg.src = img.src; // Cambia la foto grande por la pequeña clicada
+            });
+        });
+    </script>
 </body>
 
 </html>

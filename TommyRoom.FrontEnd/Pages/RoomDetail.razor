@@ -49,94 +49,117 @@ else
 
     <!-- GALLERY -->
     <div class="tr-gallery">
-        @if (!string.IsNullOrEmpty(_room.Photo))
-        {
-            <img src="@_room.Photo" alt="@_room.Name" class="tr-gallery__main" />
-        }
-        else
-        {
-            <div class="tr-gallery__placeholder"></div>
-        }
-        <span class="tr-badge @(_room.IsAvailable ? "tr-badge--gold" : "tr-badge--muted") tr-gallery__badge">
-            @(_room.IsAvailable ? "Available" : "Booked")
-        </span>
+        <div class="tr-gallery-visualizador">
+            @if (!string.IsNullOrEmpty(_room.Photo))
+            {
+                <img src="@_room.Photo" alt="@_room.Name" class="tr-gallery__main" />
+            }
+            else
+            {
+                <div class="tr-gallery__placeholder"></div>
+            }
+            <span class="tr-badge @(_room.IsAvailable ? "tr-badge--gold" : "tr-badge--muted") tr-gallery__badge">
+                @(_room.IsAvailable ? "Available" : "Booked")
+            </span>
+        </div>
+
+        <div class="tr-gallery-rigth">
+            <div class="tr-gallery-rigth-frist">
+                <div class="tr-gallery-rigth-one">
+                    <div class="tr-overline">@_room.Location</div>
+                    <h1 class="tr-detail-title">@_room.Name</h1>
+
+                    <div class="tr-detail-meta">
+                        <div class="tr-detail-meta__item">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                            </svg>
+                            @_room.Location
+                        </div>
+                        <div class="tr-detail-meta__item">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                            Up to @_room.Capacity guest@(_room.Capacity != 1 ? "s" : "")
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tr-gallery-rigth-secont">
+                    <p class="tr-detail-desc">@_room.Description</p>
+
+                    <!-- AMENITIES -->
+                    <div class="tr-detail-section-title">Amenities</div>
+                    <div class="tr-amenities">
+                        <span class="tr-amenity">WiFi</span>
+                        <span class="tr-amenity">Air Conditioning</span>
+                        <span class="tr-amenity">Private Bathroom</span>
+                        <span class="tr-amenity">Daily Cleaning</span>
+                        @if (_room.Capacity >= 2)
+                        {
+                            <span class="tr-amenity">King Bed</span>
+                        }
+                        @if (_room.PricePerNight >= 100)
+                        {
+                            <span class="tr-amenity">Mini Bar</span>
+                            <span class="tr-amenity">City View</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="tr-gallery-rigth-tree">
+                <!-- BOOKING INFO MOBILE -->
+                <div class="tr-booking-widget tr-booking-widget--mobile">
+                    <BookingWidget Room="_room" />
+                </div>
+
+                <!-- BOOKING WIDGET DESKTOP -->
+                <div class="tr-booking-widget tr-booking-widget--desktop">
+                    <BookingWidget Room="_room" />
+                </div>
+            </div>
+
+            <!-- INFO -->
+            <div class="tr-detail-info">
+
+                <div class="tr-divider" style="margin:20px 0;"><div class="tr-divider__line"></div><div class="tr-divider__diamond"></div><div class="tr-divider__line"></div></div>
+
+                
+
+                <div class="tr-divider" style="margin:28px 0 20px;"><div class="tr-divider__line"></div><div class="tr-divider__diamond"></div><div class="tr-divider__line"></div></div>
+                
+            </div>
+        </div>
     </div>
 
     <!-- DETAIL LAYOUT -->
     <div class="tr-detail-layout">
+        <!-- OWNER -->
+        @if (_room.User is not null)
+        {
+            <div class="tr-detail-section-title">Hosted by</div>
 
-        <!-- INFO -->
-        <div class="tr-detail-info">
-            <div class="tr-overline">@_room.Location</div>
-            <h1 class="tr-detail-title">@_room.Name</h1>
-
-            <div class="tr-detail-meta">
-                <div class="tr-detail-meta__item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                    </svg>
-                    @_room.Location
+            <div class="tr-host">
+                <div class="tr-host__avatar">
+                    @if (!string.IsNullOrEmpty(_room.User.Photo))
+                    {
+                        <img src="@_room.User.Photo" alt="@_room.User.FullName" />
+                    }
+                    else
+                    {
+                        <span>@(_room.User.FullName?[..1] ?? "?")</span>
+                    }
                 </div>
-                <div class="tr-detail-meta__item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    Up to @_room.Capacity guest@(_room.Capacity != 1 ? "s" : "")
+                <div>
+                    <div class="tr-host__name">@_room.User.FullName</div>
+                    <div class="tr-host__label">Host</div>
                 </div>
             </div>
-
-            <div class="tr-divider" style="margin:20px 0;"><div class="tr-divider__line"></div><div class="tr-divider__diamond"></div><div class="tr-divider__line"></div></div>
-
-            <p class="tr-detail-desc">@_room.Description</p>
-
-            <!-- AMENITIES -->
-            <div class="tr-detail-section-title">Amenities</div>
-            <div class="tr-amenities">
-                <span class="tr-amenity">WiFi</span>
-                <span class="tr-amenity">Air Conditioning</span>
-                <span class="tr-amenity">Private Bathroom</span>
-                <span class="tr-amenity">Daily Cleaning</span>
-                @if (_room.Capacity >= 2) { <span class="tr-amenity">King Bed</span> }
-                @if (_room.PricePerNight >= 100) { <span class="tr-amenity">Mini Bar</span> <span class="tr-amenity">City View</span> }
-            </div>
-
-            <!-- BOOKING INFO MOBILE -->
-            <div class="tr-booking-widget tr-booking-widget--mobile">
-                <BookingWidget Room="_room" />
-            </div>
-
-            <!-- OWNER -->
-            @if (_room.User is not null)
-            {
-                <div class="tr-divider" style="margin:28px 0 20px;"><div class="tr-divider__line"></div><div class="tr-divider__diamond"></div><div class="tr-divider__line"></div></div>
-                <div class="tr-detail-section-title">Hosted by</div>
-                <div class="tr-host">
-                    <div class="tr-host__avatar">
-                        @if (!string.IsNullOrEmpty(_room.User.Photo))
-                        {
-                            <img src="@_room.User.Photo" alt="@_room.User.FullName" />
-                        }
-                        else
-                        {
-                            <span>@(_room.User.FullName?[..1] ?? "?")</span>
-                        }
-                    </div>
-                    <div>
-                        <div class="tr-host__name">@_room.User.FullName</div>
-                        <div class="tr-host__label">Host</div>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- BOOKING WIDGET DESKTOP -->
-        <div class="tr-booking-widget tr-booking-widget--desktop">
-            <BookingWidget Room="_room" />
-        </div>
-
+        }
     </div>
 }
 
