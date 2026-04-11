@@ -163,6 +163,7 @@ button {
 
 .tr-main {
     flex: 1;
+    transform: translateY(-60px);
 }
 
 /* ── Typography helpers ────────────────────────────────── */

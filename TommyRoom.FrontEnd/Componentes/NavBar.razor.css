@@ -1,12 +1,12 @@
 ﻿/* ══════════════════════════════════════════════════════════
    NAVBAR
 ══════════════════════════════════════════════════════════ */
-.tr-nav {
+#navbar {
     position: sticky;
     top: 0;
     z-index: 100;
     height: var(--tr-nav-h);
-    background: rgba(10, 10, 10, 0.97);
+    background-color: transparent;
     backdrop-filter: blur(10px);
     border-bottom: 0.5px solid var(--tr-bdr-s);
     display: flex;
@@ -16,6 +16,10 @@
     gap: 24px;
 }
 
+    #navbar.scrolled {
+        background-color: rgba(10, 10, 10, 0.9);
+    }
+
 .tr-nav__logo {
     font-family: var(--tr-fd);
     font-size: 22px;
@@ -24,7 +28,7 @@
     color: var(--tr-tx);
     flex-shrink: 0;
 }
-
+    
     .tr-nav__logo span {
         color: var(--tr-gold);
     }

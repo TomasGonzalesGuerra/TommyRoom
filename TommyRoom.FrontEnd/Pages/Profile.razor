@@ -5,6 +5,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @using Microsoft.AspNetCore.Authorization
 @using System.Security.Claims
+@using TommyRoom.FrontEnd.Auth
 
 <PageTitle>Profile — TommyRoom</PageTitle>
 
@@ -162,7 +163,7 @@
 </div>
 
 @code {
-    private User? _user;
+    private User? _user = new();
     private bool _loading = true;
 
     // Edit profile
@@ -214,18 +215,18 @@
         _saving = true;
         try
         {
-            var updated = _user! with { FullName = _editName, PhoneNumber = _editPhone };
-            var response = await Http.PutAsJsonAsync("api/Accounts", updated);
-            if (response.IsSuccessStatusCode)
-            {
-                _user!.FullName = _editName;
-                _user!.PhoneNumber = _editPhone;
-                _editing = false;
-            }
-            else
-            {
-                _editError = "Could not save changes. Please try again.";
-            }
+            // var updated = _user! with { FullName = _editName, PhoneNumber = _editPhone };
+            // var response = await Http.PutAsJsonAsync("api/Accounts", updated);
+            // if (response.IsSuccessStatusCode)
+            // {
+            //     _user!.FullName = _editName;
+            //     _user!.PhoneNumber = _editPhone;
+            //     _editing = false;
+            // }
+            // else
+            // {
+            //     _editError = "Could not save changes. Please try again.";
+            // }
         }
         catch { _editError = "Connection error."; }
         finally { _saving = false; }
@@ -276,7 +277,7 @@
 
     private async Task SignOut()
     {
-        // await ((CustomAuthStateProvider)AuthStateProvider).LogoutAsync();
+        await ((AuthenticationProviderJWT)AuthStateProvider).LogoutAsync();
         Nav.NavigateTo("/login");
     }
 

@@ -28,13 +28,17 @@
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="js/main.js"></script>
     <script>
-        const mainImg = document.querySelector('.main-photo img');
-        const thumbs = document.querySelectorAll('.thumbnails img');
+        // Seleccionamos el navbar
+        const navbar = document.getElementById('navbar');
 
-        thumbs.forEach(img => {
-            img.addEventListener('click', () => {
-                mainImg.src = img.src; // Cambia la foto grande por la pequeña clicada
-            });
+        // Escuchamos el evento scroll
+        window.addEventListener('scroll', () => {
+            // Si el scroll vertical es mayor a 50px, agregamos la clase
+            if (window.scrollY > 55) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
         });
     </script>
 </body>

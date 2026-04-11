@@ -1,8 +1,9 @@
 ﻿@page "/login"
+@using TommyRoom.FrontEnd.Auth
 @layout AuthLayout
-@inject HttpClient Http
-@inject NavigationManager Nav
-@inject AuthenticationStateProvider AuthStateProvider
+@inject HttpClient _Http
+@inject NavigationManager _NavigationManager
+@inject AuthenticationStateProvider _AuthStateProvider
 
 <PageTitle>Sign In — TommyRoom</PageTitle>
 
@@ -106,14 +107,14 @@
         try
         {
             var dto = new LoginDTO { Email = _email, Password = _password };
-            var response = await Http.PostAsJsonAsync("api/Accounts/Login", dto);
+            var response = await _Http.PostAsJsonAsync("api/Accounts/Login", dto);
 
             if (response.IsSuccessStatusCode)
             {
                 var token = await response.Content.ReadFromJsonAsync<TokenDTO>();
                 // Guardar token y notificar al AuthStateProvider
-                // Ejemplo: await ((CustomAuthStateProvider)AuthStateProvider).LoginAsync(token!.Token);
-                Nav.NavigateTo(ReturnUrl ?? "/");
+                await ((AuthenticationProviderJWT)_AuthStateProvider).LoginAsync(token!.Token);
+                _NavigationManager.NavigateTo(ReturnUrl ?? "/");
             }
             else
             {

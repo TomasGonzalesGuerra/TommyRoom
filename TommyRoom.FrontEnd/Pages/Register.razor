@@ -1,4 +1,6 @@
 ﻿@page "/register"
+@using TommyRoom.FrontEnd.Auth
+@using TommyRoom.Shared.Enums
 @layout AuthLayout
 @inject HttpClient Http
 @inject NavigationManager Nav
@@ -146,7 +148,7 @@
             if (response.IsSuccessStatusCode)
             {
                 var token = await response.Content.ReadFromJsonAsync<TokenDTO>();
-                // await ((CustomAuthStateProvider)AuthStateProvider).LoginAsync(token!.Token);
+                await ((AuthenticationProviderJWT)AuthStateProvider).LoginAsync(token!.Token);
                 Nav.NavigateTo("/");
             }
             else
