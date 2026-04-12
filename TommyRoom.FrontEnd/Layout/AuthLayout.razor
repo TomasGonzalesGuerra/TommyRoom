@@ -1,5 +1,18 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Nav
+@using Microsoft.AspNetCore.Components.Authorization
 
-<div class="tr-auth-app">
-    @Body
+<div class="adm-app">
+    <AdminTopBar OnToggleSidebar="ToggleSidebar" />
+    <div class="adm-body">
+        <AdminSidebar Collapsed="_sidebarCollapsed" />
+        <main class="adm-main @(_sidebarCollapsed ? "adm-main--expanded" : "")">
+            @Body
+        </main>
+    </div>
 </div>
+
+@code {
+    private bool _sidebarCollapsed;
+    private void ToggleSidebar() => _sidebarCollapsed = !_sidebarCollapsed;
+}

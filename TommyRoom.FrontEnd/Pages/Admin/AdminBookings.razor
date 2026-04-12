@@ -1,0 +1,181 @@
+@page "/admin/bookings"
+@layout AuthLayout
+@attribute [Authorize(Roles = "SuperAdmin")]
+@inject HttpClient Http
+
+<PageTitle>Bookings — Admin</PageTitle>
+
+<div class="adm-page">
+    <div class="adm-page__head">
+        <div>
+            <div class="adm-overline">Management</div>
+            <h1 class="adm-page__title">Bookings</h1>
+            <p class="adm-page__sub">@_bookings.Count reservations · $@_bookings.Sum(b => b.TotalPrice) total revenue</p>
+        </div>
+    </div>
+
+    <div class="adm-stats">
+        <div class="adm-stat"><div class="adm-stat__val">@_bookings.Count</div><div class="adm-stat__lbl">Total</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@_bookings.Count(IsUpcoming)</div><div class="adm-stat__lbl">Upcoming</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@_bookings.Count(b => !IsUpcoming(b))</div><div class="adm-stat__lbl">Completed</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">$@_bookings.Sum(b => b.TotalPrice)</div><div class="adm-stat__lbl">Revenue</div></div>
+    </div>
+
+    <div class="adm-toolbar">
+        <div class="adm-toolbar__search">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Search by guest or room…" @bind="_search" @bind:event="oninput" />
+        </div>
+        <div class="adm-toolbar__filters">
+            <button class="adm-filter @(_filter == "all"       ? "adm-filter--active" : "")" @onclick='() => _filter = "all"'>All</button>
+            <button class="adm-filter @(_filter == "upcoming"  ? "adm-filter--active" : "")" @onclick='() => _filter = "upcoming"'>Upcoming</button>
+            <button class="adm-filter @(_filter == "completed" ? "adm-filter--active" : "")" @onclick='() => _filter = "completed"'>Completed</button>
+        </div>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="adm-loading">Loading bookings…</div>
+    }
+    else
+    {
+        <div class="adm-table-wrap">
+            <table class="adm-table">
+                <thead>
+                    <tr>
+                        <th>Guest</th>
+                        <th>Room</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Nights</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in FilteredBookings)
+                    {
+                        <tr>
+                            <td>
+                                <div class="adm-cell-user">
+                                    <div class="adm-cell-avatar">@Initials(b.User?.FullName)</div>
+                                    <span class="adm-cell-name">@(b.User?.FullName ?? "—")</span>
+                                </div>
+                            </td>
+                            <td>@(b.Room?.Name ?? "—")</td>
+                            <td>@b.StartTime.ToString("MMM dd, yyyy")</td>
+                            <td>@b.EndTime.ToString("MMM dd, yyyy")</td>
+                            <td>@((b.EndTime - b.StartTime).Days)</td>
+                            <td class="adm-cell-price">$@b.TotalPrice</td>
+                            <td>
+                                <span class="adm-badge @(IsUpcoming(b) ? "adm-badge--upcoming" : "adm-badge--completed")">
+                                    @(IsUpcoming(b) ? "Upcoming" : "Completed")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="adm-cell-actions">
+                                    @if (IsUpcoming(b))
+                                    {
+                                        <button class="adm-btn adm-btn--danger adm-btn--sm" @onclick="() => ConfirmDelete(b)">Cancel</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="adm-btn adm-btn--danger adm-btn--sm" @onclick="() => ConfirmDelete(b)">Delete</button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="adm-pagination">
+            <span class="adm-pagination__info">@FilteredBookings.Count() booking@(FilteredBookings.Count() != 1 ? "s" : "") found</span>
+        </div>
+    }
+</div>
+
+@if (_deleteTarget is not null)
+{
+    <div class="adm-overlay" @onclick="CloseDelete">
+        <div class="adm-modal adm-modal--sm" @onclick:stopPropagation>
+            <div class="adm-modal__header">
+                <h2 class="adm-modal__title">@(IsUpcoming(_deleteTarget) ? "Cancel booking?" : "Delete booking?")</h2>
+                <button class="adm-modal__close" @onclick="CloseDelete">✕</button>
+            </div>
+            <p class="adm-modal__body">
+                Booking by <strong>@_deleteTarget.User?.FullName</strong> for <strong>@_deleteTarget.Room?.Name</strong>
+                (@_deleteTarget.StartTime.ToString("MMM dd") – @_deleteTarget.EndTime.ToString("MMM dd, yyyy")).
+                This cannot be undone.
+            </p>
+            <div class="adm-modal__footer">
+                <button class="adm-btn adm-btn--ghost"  @onclick="CloseDelete">Keep it</button>
+                <button class="adm-btn adm-btn--danger" @onclick="ExecuteDelete" disabled="@_deleting">
+                    @(_deleting ? "Processing…" : "Confirm")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Booking> _bookings = new();
+    private bool          _loading  = true;
+    private string        _search   = "";
+    private string        _filter   = "all";
+    private Booking?      _deleteTarget;
+    private bool          _deleting;
+
+    private static bool IsUpcoming(Booking b) => b.EndTime >= DateTime.UtcNow;
+
+    private IEnumerable<Booking> FilteredBookings
+    {
+        get
+        {
+            var q = _bookings.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(_search))
+                q = q.Where(b =>
+                    (b.User?.FullName ?? "").Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                    (b.Room?.Name    ?? "").Contains(_search, StringComparison.OrdinalIgnoreCase));
+            return _filter switch
+            {
+                "upcoming"  => q.Where(IsUpcoming),
+                "completed" => q.Where(b => !IsUpcoming(b)),
+                _           => q
+            };
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try   { _bookings = await Http.GetFromJsonAsync<List<Booking>>("api/Bookings") ?? new(); }
+        catch { _bookings = new(); }
+        finally { _loading = false; }
+    }
+
+    private void ConfirmDelete(Booking b) => _deleteTarget = b;
+    private void CloseDelete()            => _deleteTarget = null;
+
+    private async Task ExecuteDelete()
+    {
+        if (_deleteTarget is null) return;
+        _deleting = true;
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Bookings/{_deleteTarget.Id}");
+            if (response.IsSuccessStatusCode) { _bookings.Remove(_deleteTarget); _deleteTarget = null; }
+        }
+        catch { }
+        finally { _deleting = false; }
+    }
+
+    private static string Initials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var p = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length >= 2 ? $"{p[0][0]}{p[^1][0]}".ToUpper() : p[0][0].ToString().ToUpper();
+    }
+}

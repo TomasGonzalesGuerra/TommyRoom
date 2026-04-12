@@ -1,0 +1,169 @@
+@page "/admin/users"
+@layout AuthLayout
+@attribute [Authorize(Roles = "SuperAdmin")]
+@inject HttpClient Http
+
+<PageTitle>Users — Admin</PageTitle>
+
+<div class="adm-page">
+    <div class="adm-page__head">
+        <div>
+            <div class="adm-overline">Management</div>
+            <h1 class="adm-page__title">Users</h1>
+            <p class="adm-page__sub">@_users.Count registered users</p>
+        </div>
+    </div>
+
+    <div class="adm-stats">
+        <div class="adm-stat"><div class="adm-stat__val">@_users.Count</div><div class="adm-stat__lbl">Total users</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@_users.Count(u => u.UserType == UserType.User)</div><div class="adm-stat__lbl">Guests</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@_users.Count(u => u.UserType == UserType.SuperAdmin)</div><div class="adm-stat__lbl">Admins</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@_users.Count</div><div class="adm-stat__lbl">Total registered</div></div>
+    </div>
+
+    <div class="adm-toolbar">
+        <div class="adm-toolbar__search">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Search by name or email…" @bind="_search" @bind:event="oninput" />
+        </div>
+        <div class="adm-toolbar__filters">
+            <button class="adm-filter @(_filter == "all"    ? "adm-filter--active" : "")" @onclick='() => _filter = "all"'>All</button>
+            <button class="adm-filter @(_filter == "user"   ? "adm-filter--active" : "")" @onclick='() => _filter = "user"'>Guests</button>
+            <button class="adm-filter @(_filter == "admin"  ? "adm-filter--active" : "")" @onclick='() => _filter = "admin"'>Admins</button>
+        </div>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="adm-loading">Loading users…</div>
+    }
+    else
+    {
+        <div class="adm-table-wrap">
+            <table class="adm-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in FilteredUsers)
+                    {
+                        <tr>
+                            <td>
+                                <div class="adm-cell-user">
+                                    <div class="adm-cell-avatar">
+                                        @if (!string.IsNullOrEmpty(user.Photo))
+                                        {
+                                            <img src="@user.Photo" alt="@user.FullName" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                                        }
+                                        else { @Initials(user.FullName) }
+                                    </div>
+                                    <span class="adm-cell-name">@user.FullName</span>
+                                </div>
+                            </td>
+                            <td>@user.Email</td>
+                            <td>@(user.PhoneNumber ?? "—")</td>
+                            <td>
+                                <span class="adm-badge @(user.UserType == UserType.SuperAdmin ? "adm-badge--admin" : "adm-badge--user")">
+                                    @user.UserType.ToString()
+                                </span>
+                            </td>
+                            <td>
+                                <div class="adm-cell-actions">
+                                    <button class="adm-btn adm-btn--ghost adm-btn--sm" @onclick="() => OpenDetail(user)">View</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="adm-pagination">
+            <span class="adm-pagination__info">@FilteredUsers.Count() user@(FilteredUsers.Count() != 1 ? "s" : "") found</span>
+        </div>
+    }
+</div>
+
+@if (_detailUser is not null)
+{
+    <div class="adm-overlay" @onclick="CloseDetail">
+        <div class="adm-modal" @onclick:stopPropagation>
+            <div class="adm-modal__header">
+                <h2 class="adm-modal__title">User detail</h2>
+                <button class="adm-modal__close" @onclick="CloseDetail">✕</button>
+            </div>
+            <div class="adm-user-detail">
+                <div class="adm-cell-avatar adm-cell-avatar--lg">
+                    @if (!string.IsNullOrEmpty(_detailUser.Photo))
+                    {
+                        <img src="@_detailUser.Photo" alt="@_detailUser.FullName" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                    }
+                    else { @Initials(_detailUser.FullName) }
+                </div>
+                <div class="adm-user-detail__info">
+                    <div class="adm-user-detail__name">@_detailUser.FullName</div>
+                    <div class="adm-user-detail__row"><span>Email</span><strong>@_detailUser.Email</strong></div>
+                    <div class="adm-user-detail__row"><span>Phone</span><strong>@(_detailUser.PhoneNumber ?? "—")</strong></div>
+                    <div class="adm-user-detail__row"><span>Role</span>
+                        <span class="adm-badge @(_detailUser.UserType == UserType.SuperAdmin ? "adm-badge--admin" : "adm-badge--user")">
+                            @_detailUser.UserType.ToString()
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="adm-modal__footer">
+                <button class="adm-btn adm-btn--ghost" @onclick="CloseDetail">Close</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<User> _users   = new();
+    private bool       _loading = true;
+    private string     _search  = "";
+    private string     _filter  = "all";
+    private User?      _detailUser;
+
+    private IEnumerable<User> FilteredUsers
+    {
+        get
+        {
+            var q = _users.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(_search))
+                q = q.Where(u =>
+                    (u.FullName ?? "").Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                    (u.Email    ?? "").Contains(_search, StringComparison.OrdinalIgnoreCase));
+            return _filter switch
+            {
+                "user"  => q.Where(u => u.UserType == UserType.User),
+                "admin" => q.Where(u => u.UserType == UserType.SuperAdmin),
+                _       => q
+            };
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try   { _users = await Http.GetFromJsonAsync<List<User>>("api/Accounts/AllUsers") ?? new(); }
+        catch { _users = new(); }
+        finally { _loading = false; }
+    }
+
+    private void OpenDetail(User u) => _detailUser = u;
+    private void CloseDetail()      => _detailUser = null;
+
+    private static string Initials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var p = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length >= 2 ? $"{p[0][0]}{p[^1][0]}".ToUpper() : p[0][0].ToString().ToUpper();
+    }
+}

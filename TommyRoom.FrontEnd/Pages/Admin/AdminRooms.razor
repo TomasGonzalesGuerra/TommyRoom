@@ -1,0 +1,327 @@
+@page "/admin/rooms"
+@layout AuthLayout
+@attribute [Authorize(Roles = "SuperAdmin")]
+@inject HttpClient Http
+
+<PageTitle>Rooms — Admin</PageTitle>
+
+<div class="adm-page">
+
+    <div class="adm-page__head">
+        <div>
+            <div class="adm-overline">Management</div>
+            <h1 class="adm-page__title">Rooms</h1>
+            <p class="adm-page__sub">@_rooms.Count total · @_rooms.Count(r => r.IsAvailable) available</p>
+        </div>
+        <button class="adm-btn adm-btn--primary" @onclick="OpenCreateModal">+ New Room</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="adm-stats">
+        <div class="adm-stat"><div class="adm-stat__val">@_rooms.Count</div><div class="adm-stat__lbl">Total rooms</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@_rooms.Count(r => r.IsAvailable)</div><div class="adm-stat__lbl">Available</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@_rooms.Count(r => !r.IsAvailable)</div><div class="adm-stat__lbl">Booked</div></div>
+        <div class="adm-stat"><div class="adm-stat__val">@(_rooms.Any() ? $"${_rooms.Average(r => r.PricePerNight):F0}" : "—")</div><div class="adm-stat__lbl">Avg price/night</div></div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="adm-toolbar">
+        <div class="adm-toolbar__search">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Search rooms…" @bind="_search" @bind:event="oninput" />
+        </div>
+        <div class="adm-toolbar__filters">
+            <button class="adm-filter @(_filter == "all"       ? "adm-filter--active" : "")" @onclick='() => _filter = "all"'>All</button>
+            <button class="adm-filter @(_filter == "available" ? "adm-filter--active" : "")" @onclick='() => _filter = "available"'>Available</button>
+            <button class="adm-filter @(_filter == "booked"    ? "adm-filter--active" : "")" @onclick='() => _filter = "booked"'>Booked</button>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    @if (_loading)
+    {
+        <div class="adm-loading">Loading rooms…</div>
+    }
+    else
+    {
+        <div class="adm-table-wrap">
+            <table class="adm-table">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Location</th>
+                        <th>Capacity</th>
+                        <th>Price / night</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in FilteredRooms)
+                    {
+                        <tr>
+                            <td>
+                                <div class="adm-cell-room">
+                                    @if (!string.IsNullOrEmpty(room.Photo))
+                                    {
+                                        <img src="@room.Photo" class="adm-cell-thumb" alt="@room.Name" />
+                                    }
+                                    else
+                                    {
+                                        <div class="adm-cell-thumb adm-cell-thumb--placeholder"></div>
+                                    }
+                                    <span class="adm-cell-name">@room.Name</span>
+                                </div>
+                            </td>
+                            <td>@room.Location</td>
+                            <td>@room.Capacity</td>
+                            <td class="adm-cell-price">$@room.PricePerNight</td>
+                            <td>
+                                <span class="adm-badge @(room.IsAvailable ? "adm-badge--available" : "adm-badge--booked")">
+                                    @(room.IsAvailable ? "Available" : "Booked")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="adm-cell-actions">
+                                    <button class="adm-btn adm-btn--outline adm-btn--sm" @onclick="() => OpenEditModal(room)">Edit</button>
+                                    <button class="adm-btn adm-btn--danger  adm-btn--sm" @onclick="() => ConfirmDelete(room)">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="adm-pagination">
+            <span class="adm-pagination__info">@FilteredRooms.Count() room@(FilteredRooms.Count() != 1 ? "s" : "") found</span>
+        </div>
+    }
+</div>
+
+<!-- CREATE / EDIT MODAL -->
+@if (_modalOpen)
+{
+    <div class="adm-overlay" @onclick="CloseModal">
+        <div class="adm-modal" @onclick:stopPropagation>
+            <div class="adm-modal__header">
+                <h2 class="adm-modal__title">@(_editingRoom?.Id > 0 ? "Edit Room" : "New Room")</h2>
+                <button class="adm-modal__close" @onclick="CloseModal">✕</button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_modalError))
+            {
+                <div class="adm-alert adm-alert--error">@_modalError</div>
+            }
+
+            <div class="adm-form">
+                <div class="adm-form__row">
+                    <div class="adm-form__field">
+                        <label class="adm-form__label">Name</label>
+                        <input class="adm-form__input" type="text" @bind="_editingRoom!.Name" placeholder="Suite name" />
+                    </div>
+                    <div class="adm-form__field">
+                        <label class="adm-form__label">Location</label>
+                        <input class="adm-form__input" type="text" @bind="_editingRoom.Location" placeholder="Palermo, Buenos Aires" />
+                    </div>
+                </div>
+                <div class="adm-form__row">
+                    <div class="adm-form__field">
+                        <label class="adm-form__label">Price / night ($)</label>
+                        <input class="adm-form__input" type="number" @bind="_editingRoom.PricePerNight" min="1" />
+                    </div>
+                    <div class="adm-form__field">
+                        <label class="adm-form__label">Capacity</label>
+                        <input class="adm-form__input" type="number" @bind="_editingRoom.Capacity" min="1" />
+                    </div>
+                </div>
+                <div class="adm-form__field">
+                    <label class="adm-form__label">Description</label>
+                    <textarea class="adm-form__input adm-form__textarea" @bind="_editingRoom.Description" placeholder="Room description…"></textarea>
+                </div>
+                <div class="adm-form__field">
+                    <label class="adm-form__label">Photo URL</label>
+                    <input class="adm-form__input" type="text" @bind="_editingRoom.Photo" placeholder="https://…" />
+                </div>
+                @if (_editingRoom.Id > 0)
+                {
+                    <div class="adm-form__field">
+                        <label class="adm-form__label">Status</label>
+                        <select class="adm-form__input adm-form__select" @bind="_editingRoom.IsAvailable">
+                            <option value="true">Available</option>
+                            <option value="false">Booked</option>
+                        </select>
+                    </div>
+                }
+            </div>
+
+            <div class="adm-modal__footer">
+                <button class="adm-btn adm-btn--ghost" @onclick="CloseModal">Cancel</button>
+                <button class="adm-btn adm-btn--primary" @onclick="SaveRoom" disabled="@_saving">
+                    @(_saving ? "Saving…" : (_editingRoom?.Id > 0 ? "Save changes" : "Create Room"))
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- DELETE CONFIRM -->
+@if (_deleteTarget is not null)
+{
+    <div class="adm-overlay" @onclick="CloseDelete">
+        <div class="adm-modal adm-modal--sm" @onclick:stopPropagation>
+            <div class="adm-modal__header">
+                <h2 class="adm-modal__title">Delete room?</h2>
+                <button class="adm-modal__close" @onclick="CloseDelete">✕</button>
+            </div>
+            <p class="adm-modal__body">
+                You are about to permanently delete <strong>@_deleteTarget.Name</strong>. This cannot be undone.
+            </p>
+            <div class="adm-modal__footer">
+                <button class="adm-btn adm-btn--ghost"   @onclick="CloseDelete">Cancel</button>
+                <button class="adm-btn adm-btn--danger"  @onclick="ExecuteDelete" disabled="@_deleting">
+                    @(_deleting ? "Deleting…" : "Yes, delete")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Room> _rooms  = new();
+    private bool       _loading = true;
+    private string     _search  = "";
+    private string     _filter  = "all";
+
+    private bool       _modalOpen;
+    private Room?      _editingRoom;
+    private bool       _saving;
+    private string     _modalError = "";
+
+    private Room?      _deleteTarget;
+    private bool       _deleting;
+
+    private IEnumerable<Room> FilteredRooms
+    {
+        get
+        {
+            var q = _rooms.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(_search))
+                q = q.Where(r =>
+                    (r.Name     ?? "").Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                    (r.Location ?? "").Contains(_search, StringComparison.OrdinalIgnoreCase));
+            return _filter switch
+            {
+                "available" => q.Where(r => r.IsAvailable),
+                "booked"    => q.Where(r => !r.IsAvailable),
+                _           => q
+            };
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try   { _rooms = await Http.GetFromJsonAsync<List<Room>>("api/Rooms") ?? new(); }
+        catch { _rooms = new(); }
+        finally { _loading = false; }
+    }
+
+    private void OpenCreateModal()
+    {
+        _editingRoom = new Room();
+        _modalError  = "";
+        _modalOpen   = true;
+    }
+
+    private void OpenEditModal(Room room)
+    {
+        _editingRoom = new Room
+        {
+            Id            = room.Id,
+            Name          = room.Name,
+            Location      = room.Location,
+            Description   = room.Description,
+            Capacity      = room.Capacity,
+            PricePerNight = room.PricePerNight,
+            Photo         = room.Photo,
+            IsAvailable   = room.IsAvailable,
+            OwnerId       = room.OwnerId
+        };
+        _modalError = "";
+        _modalOpen  = true;
+    }
+
+    private void CloseModal()
+    {
+        _modalOpen   = false;
+        _editingRoom = null;
+    }
+
+    private async Task SaveRoom()
+    {
+        _modalError = "";
+        if (string.IsNullOrWhiteSpace(_editingRoom?.Name))
+        {
+            _modalError = "Name is required.";
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            HttpResponseMessage response;
+            if (_editingRoom!.Id == 0)
+            {
+                var dto = new TommyRoom.Shared.DTOs.CreatedRoomDTO
+                {
+                    Name          = _editingRoom.Name,
+                    Location      = _editingRoom.Location,
+                    Description   = _editingRoom.Description,
+                    Capacity      = _editingRoom.Capacity,
+                    PricePerNight = _editingRoom.PricePerNight,
+                    Photo         = _editingRoom.Photo
+                };
+                response = await Http.PostAsJsonAsync("api/Rooms", dto);
+            }
+            else
+            {
+                response = await Http.PutAsJsonAsync("api/Rooms", _editingRoom);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                _rooms = await Http.GetFromJsonAsync<List<Room>>("api/Rooms") ?? new();
+                CloseModal();
+            }
+            else
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                _modalError = string.IsNullOrWhiteSpace(msg) ? "Could not save." : msg.Trim('"');
+            }
+        }
+        catch { _modalError = "Connection error."; }
+        finally { _saving = false; }
+    }
+
+    private void ConfirmDelete(Room room) => _deleteTarget = room;
+    private void CloseDelete()           => _deleteTarget = null;
+
+    private async Task ExecuteDelete()
+    {
+        if (_deleteTarget is null) return;
+        _deleting = true;
+        try
+        {
+            var response = await Http.DeleteAsync($"api/Rooms/{_deleteTarget.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                _rooms.Remove(_deleteTarget);
+                _deleteTarget = null;
+            }
+        }
+        catch { }
+        finally { _deleting = false; }
+    }
+}

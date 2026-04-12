@@ -8,6 +8,12 @@
         <a href="/" class="tr-nav__link @(IsActive("/") ? "tr-nav__link--active" : "")">Rooms</a>
         <a href="/about" class="tr-nav__link @(IsActive("/about") ? "tr-nav__link--active" : "")">About</a>
         <a href="/contact" class="tr-nav__link @(IsActive("/contact") ? "tr-nav__link--active" : "")">Contact</a>
+
+        <AuthorizeView Roles="SuperAdmin">
+            <Authorized>
+                <a href="/admin/rooms" class="tr-nav__link @(IsActive("/my-bookings") ? "tr-nav__link--active" : "")">Admin Panel</a>
+            </Authorized>
+        </AuthorizeView>
     </div>
 
     <!-- Actions -->

@@ -1,0 +1,50 @@
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@using System.Security.Claims
+
+<header class="adm-topbar">
+    <div class="adm-topbar__left">
+        <button class="adm-topbar__toggle" @onclick="OnToggleSidebar" title="Toggle sidebar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <line x1="3" y1="6"  x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+        <a href="/admin" class="adm-topbar__logo">Tommy<span>Room</span></a>
+        <span class="adm-topbar__badge">Admin Panel</span>
+    </div>
+
+    <div class="adm-topbar__right">
+        <a href="/" class="adm-btn adm-btn--ghost adm-btn--sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Client View
+        </a>
+        <AuthorizeView>
+            <Authorized>
+                <div class="adm-topbar__user">
+                    <div class="adm-topbar__avatar">@Initials(context.User)</div>
+                    <span>@FullName(context.User)</span>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</header>
+
+@code {
+    [Parameter] public EventCallback OnToggleSidebar { get; set; }
+
+    private static string Initials(ClaimsPrincipal user)
+    {
+        var name = user.FindFirst("FullName")?.Value ?? "";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length >= 2
+            ? $"{parts[0][0]}{parts[^1][0]}".ToUpper()
+            : parts.Length == 1 ? parts[0][0].ToString().ToUpper() : "?";
+    }
+
+    private static string FullName(ClaimsPrincipal user) =>
+        user.FindFirst("FullName")?.Value ?? user.FindFirst(ClaimTypes.Name)?.Value ?? "Admin";
+}
