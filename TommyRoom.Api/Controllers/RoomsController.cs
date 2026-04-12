@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using TommyRoom.Api.Data;
 using TommyRoom.Api.Helpers;
+using TommyRoom.Api.Hubs;
 using TommyRoom.Shared.DTOs;
 using TommyRoom.Shared.Entities;
 
@@ -12,11 +13,12 @@ namespace TommyRoom.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class RoomsController(DataContext dataContext, IUserHelper userHelper,IFileStorage fileStorage) : ControllerBase
+public class RoomsController(DataContext dataContext, IUserHelper userHelper, IFileStorage fileStorage, IHubContext<NotificationHub> hubContext) : ControllerBase
 {
     private readonly DataContext _dataContext = dataContext;
     private readonly IUserHelper _userHelper = userHelper;
     private readonly IFileStorage _fileStorage = fileStorage;
+    private readonly IHubContext<NotificationHub> _hub = hubContext;
     private readonly string _container = "rooms";
 
 
@@ -52,6 +54,16 @@ public class RoomsController(DataContext dataContext, IUserHelper userHelper,IFi
         try
         {
             await _dataContext.SaveChangesAsync();
+
+            NotificationDTO roomNotif = new()
+            {
+                Type = "room_updated",
+                Title = "Room Updated",
+                Message = $"{room.Name} is now {(room.IsAvailable ? "available" : "unavailable")}.",
+                RoomId = room.Id.ToString()
+            };
+
+            await _hub.Clients.Group("admins").SendAsync("ReceiveNotification", roomNotif);
         }
         catch (DbUpdateConcurrencyException)
         {

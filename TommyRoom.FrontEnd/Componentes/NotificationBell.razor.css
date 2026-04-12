@@ -1,0 +1,118 @@
+.notif-wrap { position: relative; }
+
+.notif-bell {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #181818;
+    border: 0.5px solid rgba(240,237,230,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8a8578;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+.notif-bell:hover { border-color: rgba(201,168,76,0.18); color: #c9a84c; }
+.notif-bell--active { color: #c9a84c; border-color: rgba(201,168,76,0.18); }
+
+.notif-bell__dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #c9a84c;
+    color: #0a0a0a;
+    font-size: 8px;
+    font-weight: 500;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.notif-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 98;
+}
+
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 300px;
+    background: #111;
+    border: 0.5px solid rgba(201,168,76,0.18);
+    border-radius: 4px;
+    z-index: 99;
+    overflow: hidden;
+}
+
+.notif-dropdown__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 0.5px solid rgba(240,237,230,0.07);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8a8578;
+}
+
+.notif-clear {
+    background: none;
+    border: none;
+    font-size: 9px;
+    color: #c9a84c;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.notif-empty {
+    padding: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: #4a4740;
+}
+
+.notif-list { max-height: 320px; overflow-y: auto; }
+
+.notif-item {
+    display: flex;
+    gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 0.5px solid rgba(240,237,230,0.05);
+    transition: background 0.15s;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: rgba(240,237,230,0.02); }
+.notif-item--unread { background: rgba(201,168,76,0.04); }
+
+.notif-item__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1c1c1c;
+    border: 0.5px solid rgba(240,237,230,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #8a8578;
+}
+.notif-item--booking-created   .notif-item__icon { color: #c9a84c; border-color: rgba(201,168,76,0.2); }
+.notif-item--booking-cancelled .notif-item__icon { color: #e06060; border-color: rgba(224,96,96,0.2); }
+.notif-item--room-updated      .notif-item__icon { color: #6abf8a; border-color: rgba(106,191,138,0.2); }
+
+.notif-item__body { flex: 1; min-width: 0; }
+.notif-item__title { font-size: 12px; color: #f0ede6; margin-bottom: 2px; }
+.notif-item__msg   { font-size: 11px; color: #8a8578; line-height: 1.4; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.notif-item__time  { font-size: 10px; color: #4a4740; }

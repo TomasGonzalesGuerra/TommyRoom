@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using TommyRoom.Api.Data;
 using TommyRoom.Api.Helpers;
+using TommyRoom.Api.Hubs;
 using TommyRoom.Shared.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddScoped<IFileStorage, FileStorage>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -75,6 +77,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();
 

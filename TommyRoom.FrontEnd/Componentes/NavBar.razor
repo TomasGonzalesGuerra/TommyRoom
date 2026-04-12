@@ -1,4 +1,5 @@
 @inject NavigationManager _Nav
+@inject AuthenticationStateProvider _AuthStateProvider
 
 <nav class="tr-nav" id="navbar" >
     <a href="/" class="tr-nav__logo">Tommy<span>Room</span></a>
@@ -21,6 +22,7 @@
         <AuthorizeView>
             <Authorized>
                 <a href="/my-bookings" class="tr-nav__link @(IsActive("/my-bookings") ? "tr-nav__link--active" : "")">My Bookings</a>
+                <NotificationBell UserId="@_userId" IsAdmin="false" />
                 <a href="/profile" class="tr-nav__icon" title="Profile">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <circle cx="12" cy="8" r="4"/>
@@ -66,6 +68,13 @@
 
 @code {
     private bool _menuOpen;
+    private string? _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await _AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    }
 
     private void ToggleMenu() => _menuOpen = !_menuOpen;
     private void CloseMenu() => _menuOpen = false;

@@ -1,6 +1,5 @@
-@inject NavigationManager Nav
-@inject AuthenticationStateProvider AuthStateProvider
 @using System.Security.Claims
+@inject AuthenticationStateProvider _AuthStateProvider
 
 <header class="adm-topbar">
     <div class="adm-topbar__left">
@@ -22,6 +21,7 @@
             </svg>
             Client View
         </a>
+        <NotificationBell UserId="@_userId" IsAdmin="true" />
         <AuthorizeView>
             <Authorized>
                 <div class="adm-topbar__user">
@@ -35,6 +35,13 @@
 
 @code {
     [Parameter] public EventCallback OnToggleSidebar { get; set; }
+    private string? _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await _AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    }
 
     private static string Initials(ClaimsPrincipal user)
     {
