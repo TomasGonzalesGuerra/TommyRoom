@@ -59,57 +59,6 @@
     gap: 12px;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .tr-nav__icon {
     width: 34px;
     height: 34px;
@@ -145,6 +94,7 @@
         transition: background 0.2s;
     }
 
+
 /* Mobile drawer */
 .tr-nav__drawer {
     position: fixed;
@@ -179,3 +129,20 @@
     background: var(--tr-bdr);
     margin: 8px 0;
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+    .tr-nav__links, .tr-nav__actions {
+        display: none;
+    }
+
+    .tr-nav__ham {
+        display: flex;
+    }
+}
+
+

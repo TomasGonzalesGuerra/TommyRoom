@@ -139,8 +139,9 @@
 /* ── Tabs ──────────────────────────────────────────────── */
 .tr-tabs {
     display: flex;
+    gap: 1.5rem;
     border-bottom: 0.5px solid var(--tr-bdr-s);
-    margin-bottom: 24px;
+    margin-bottom: 2rem;
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -155,7 +156,7 @@
     border-bottom: 1.5px solid transparent;
     padding: 6px 10px;
     font-family: var(--tr-fb);
-    font-size: 8px;
+    font-size: 1rem;
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -177,6 +178,34 @@
 /* ── Room Grid ─────────────────────────────────────────── */
 .tr-rooms__grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+    .tr-rooms__grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 786px) {
+    .tr-rooms__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .tr-rooms__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 425px) {
+    .tr-rooms__grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
 }

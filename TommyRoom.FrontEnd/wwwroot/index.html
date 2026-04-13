@@ -27,20 +27,6 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="js/main.js"></script>
-    <script>
-        // Seleccionamos el navbar
-        const navbar = document.getElementById('navbar');
-
-        // Escuchamos el evento scroll
-        window.addEventListener('scroll', () => {
-            // Si el scroll vertical es mayor a 50px, agregamos la clase
-            if (window.scrollY > 55) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-    </script>
 </body>
 
 </html>
