@@ -1,7 +1,7 @@
 using TommyRoom.Shared.DTOs;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace TommyRoom.Client.Services;
+namespace TommyRoom.FrontEnd.Services;
 
 public class NotificationService : IAsyncDisposable
 {

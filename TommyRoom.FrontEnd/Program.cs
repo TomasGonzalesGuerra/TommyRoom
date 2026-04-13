@@ -2,7 +2,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using TommyRoom.Client.Services;
+using TommyRoom.FrontEnd.Services;
 using TommyRoom.FrontEnd;
 using TommyRoom.FrontEnd.Auth;
 

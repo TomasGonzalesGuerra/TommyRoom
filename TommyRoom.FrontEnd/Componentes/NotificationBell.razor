@@ -1,6 +1,6 @@
 @inject NotificationService NotifService
 @inject NavigationManager Nav
-@using TommyRoom.Client.Services
+@using TommyRoom.FrontEnd.Services
 @implements IAsyncDisposable
 
 <div class="notif-wrap">
@@ -74,6 +74,13 @@
             }
         </div>
 
+        @* Borrar después de    q<debuggear *@
+        <div style="font-size:9px;color:#666;">
+            SignalR: @(NotifService.IsConnected ? "✓ connected" : "✗ disconnected")
+            | UserId: @UserId
+            | IsAdmin: @IsAdmin
+        </div>
+
         <!-- click fuera cierra el dropdown -->
         <div class="notif-backdrop" @onclick="() => _open = false"></div>
     }
@@ -81,17 +88,23 @@
 
 @code {
     [Parameter] public string?  UserId  { get; set; }
-    [Parameter] public bool     IsAdmin { get; set; }
-
+    [Parameter] public bool IsAdmin { get; set; }
     private List<NotifItem> _notifications = new();
     private bool _open;
     private int  _unread => _notifications.Count(n => !n.Read);
+    private bool _started;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        NotifService.OnNotification += HandleNotification;
+        // Solo conectar cuando tengamos el UserId y no hayamos conectado antes
+        if (_started) return;
+        if (!IsAdmin && string.IsNullOrEmpty(UserId)) return;
 
-        var hubUrl = Nav.BaseUri.TrimEnd('/') + "/hubs/notifications";
+        _started = true;
+        NotifService.OnNotification += HandleNotification;
+        
+        var hubUrl = "https://localhost:7227/hubs/notifications";
+
         await NotifService.StartAsync(hubUrl, UserId, IsAdmin);
     }
 
@@ -148,4 +161,7 @@
         public DateTime CreatedAt { get; set; }
         public bool     Read      { get; set; }
     }
+}
+
+@code {
 }

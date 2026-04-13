@@ -73,7 +73,8 @@
     protected override async Task OnInitializedAsync()
     {
         var state = await _AuthStateProvider.GetAuthenticationStateAsync();
-        _userId = state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        _userId = state.User.FindFirst("nameid")?.Value
+               ?? state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     }
 
     private void ToggleMenu() => _menuOpen = !_menuOpen;
