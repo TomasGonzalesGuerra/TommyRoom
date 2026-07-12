@@ -11,9 +11,9 @@ using TommyRoom.Api.Data;
 
 namespace TommyRoom.Api.Migrations
 {
-    [DbContext(typeof(DataContext))]
-    [Migration("20250719032132_OtherTablesss")]
-    partial class OtherTablesss
+    [DbContext(typeof(RoomDataContext))]
+    [Migration("20260712224703_InitiAll")]
+    partial class InitiAll
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,7 +158,7 @@ namespace TommyRoom.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TommyRoom.Shared.Entities.Booking", b =>
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -166,28 +166,136 @@ namespace TommyRoom.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TransactionReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Reservation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("CheckInDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("CheckOutDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReservationStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationStatus");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("CheckInDate", "CheckOutDate");
+
+                    b.ToTable("Reservations", t =>
+                        {
+                            t.HasCheckConstraint("CK_Reservations_Dates", "\"CheckOutDate\" > \"CheckInDate\"");
+                        });
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.ReservationRoom", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("RatePerNight")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
 
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RoomId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ReservationId", "RoomId")
+                        .IsUnique();
 
-                    b.ToTable("Bookings");
+                    b.ToTable("ReservationRooms");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.ReservationService", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPriceSnapshot")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ReservationServices");
                 });
 
             modelBuilder.Entity("TommyRoom.Shared.Entities.Room", b =>
@@ -198,24 +306,96 @@ namespace TommyRoom.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Capacity")
+                    b.Property<int>("Floor")
                         .HasColumnType("int");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Photo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("PricePerNight")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("RoomNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("RoomStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("RoomTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RoomNumber")
+                        .IsUnique();
+
+                    b.HasIndex("RoomTypeId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.RoomType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BaseRate")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("MaxCapacity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RoomTypes");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Service", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ChargeType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("TommyRoom.Shared.Entities.User", b =>
@@ -229,6 +409,9 @@ namespace TommyRoom.Api.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -345,31 +528,110 @@ namespace TommyRoom.Api.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TommyRoom.Shared.Entities.Booking", b =>
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Payment", b =>
                 {
-                    b.HasOne("TommyRoom.Shared.Entities.Room", "Room")
-                        .WithMany("Bookings")
-                        .HasForeignKey("RoomId")
+                    b.HasOne("TommyRoom.Shared.Entities.Reservation", "Reservation")
+                        .WithMany("Payments")
+                        .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TommyRoom.Shared.Entities.User", "User")
-                        .WithMany("Bookings")
-                        .HasForeignKey("UserId");
+                    b.Navigation("Reservation");
+                });
 
-                    b.Navigation("Room");
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Reservation", b =>
+                {
+                    b.HasOne("TommyRoom.Shared.Entities.User", "User")
+                        .WithMany("Reservations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TommyRoom.Shared.Entities.ReservationRoom", b =>
+                {
+                    b.HasOne("TommyRoom.Shared.Entities.Reservation", "Reservation")
+                        .WithMany("ReservationRooms")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TommyRoom.Shared.Entities.Room", "Room")
+                        .WithMany("ReservationRooms")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.ReservationService", b =>
+                {
+                    b.HasOne("TommyRoom.Shared.Entities.Reservation", "Reservation")
+                        .WithMany("ReservationServices")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TommyRoom.Shared.Entities.Service", "Service")
+                        .WithMany("ReservationServices")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+
+                    b.Navigation("Service");
+                });
+
             modelBuilder.Entity("TommyRoom.Shared.Entities.Room", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.HasOne("TommyRoom.Shared.Entities.RoomType", "RoomType")
+                        .WithMany("Rooms")
+                        .HasForeignKey("RoomTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TommyRoom.Shared.Entities.User", null)
+                        .WithMany("Rooms")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("RoomType");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Reservation", b =>
+                {
+                    b.Navigation("Payments");
+
+                    b.Navigation("ReservationRooms");
+
+                    b.Navigation("ReservationServices");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Room", b =>
+                {
+                    b.Navigation("ReservationRooms");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.RoomType", b =>
+                {
+                    b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("TommyRoom.Shared.Entities.Service", b =>
+                {
+                    b.Navigation("ReservationServices");
                 });
 
             modelBuilder.Entity("TommyRoom.Shared.Entities.User", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.Navigation("Reservations");
+
+                    b.Navigation("Rooms");
                 });
 #pragma warning restore 612, 618
         }

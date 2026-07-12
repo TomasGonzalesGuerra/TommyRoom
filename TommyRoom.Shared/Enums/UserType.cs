@@ -1,8 +1,9 @@
-﻿namespace TommyRoom.Shared.Enums
+﻿namespace TommyRoom.Shared.Enums;
+
+public enum UserType
 {
-    public enum UserType
-    {
-        SuperAdmin,
-        User
-    }
+    SuperAdmin,
+    Guest,
+    Receptionist,
+    User
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TommyRoom.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialUsers : Migration
+    public partial class InitiAll : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,8 +31,9 @@ namespace TommyRoom.Api.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Photo = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserType = table.Column<int>(type: "int", nullable: false),
+                    Photo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -54,18 +55,35 @@ namespace TommyRoom.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Rooms",
+                name: "RoomTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Capacity = table.Column<int>(type: "int", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    BaseRate = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    MaxCapacity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.PrimaryKey("PK_RoomTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Services",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    UnitPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    ChargeType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Services", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -180,25 +198,132 @@ namespace TommyRoom.Api.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RoomId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ReservationStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    CheckInDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    CheckOutDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Reservations", x => x.Id);
+                    table.CheckConstraint("CK_Reservations_Dates", "\"CheckOutDate\" > \"CheckInDate\"");
                     table.ForeignKey(
                         name: "FK_Reservations_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoomNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Floor = table.Column<int>(type: "int", nullable: false),
+                    RoomStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Photo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoomTypeId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Reservations_Rooms_RoomId",
+                        name: "FK_Rooms_RoomTypes_RoomTypeId",
+                        column: x => x.RoomTypeId,
+                        principalTable: "RoomTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    PaymentStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    TransactionReference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReservationId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_Reservations_ReservationId",
+                        column: x => x.ReservationId,
+                        principalTable: "Reservations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReservationServices",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    UnitPriceSnapshot = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    ReservationId = table.Column<int>(type: "int", nullable: false),
+                    ServiceId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReservationServices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReservationServices_Reservations_ReservationId",
+                        column: x => x.ReservationId,
+                        principalTable: "Reservations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ReservationServices_Services_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Services",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReservationRooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RatePerNight = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    ReservationId = table.Column<int>(type: "int", nullable: false),
+                    RoomId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReservationRooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReservationRooms_Reservations_ReservationId",
+                        column: x => x.ReservationId,
+                        principalTable: "Reservations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ReservationRooms_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -241,13 +366,60 @@ namespace TommyRoom.Api.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reservations_RoomId",
-                table: "Reservations",
+                name: "IX_Payments_ReservationId",
+                table: "Payments",
+                column: "ReservationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReservationRooms_ReservationId_RoomId",
+                table: "ReservationRooms",
+                columns: new[] { "ReservationId", "RoomId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReservationRooms_RoomId",
+                table: "ReservationRooms",
                 column: "RoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_CheckInDate_CheckOutDate",
+                table: "Reservations",
+                columns: new[] { "CheckInDate", "CheckOutDate" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_ReservationStatus",
+                table: "Reservations",
+                column: "ReservationStatus");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_UserId",
                 table: "Reservations",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReservationServices_ReservationId",
+                table: "ReservationServices",
+                column: "ReservationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReservationServices_ServiceId",
+                table: "ReservationServices",
+                column: "ServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_RoomNumber",
+                table: "Rooms",
+                column: "RoomNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_RoomTypeId",
+                table: "Rooms",
+                column: "RoomTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_UserId",
+                table: "Rooms",
                 column: "UserId");
         }
 
@@ -270,16 +442,31 @@ namespace TommyRoom.Api.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Reservations");
+                name: "Payments");
+
+            migrationBuilder.DropTable(
+                name: "ReservationRooms");
+
+            migrationBuilder.DropTable(
+                name: "ReservationServices");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Rooms");
 
             migrationBuilder.DropTable(
-                name: "Rooms");
+                name: "Reservations");
+
+            migrationBuilder.DropTable(
+                name: "Services");
+
+            migrationBuilder.DropTable(
+                name: "RoomTypes");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

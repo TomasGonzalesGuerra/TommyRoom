@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,15 +10,14 @@ using TommyRoom.Api.Data;
 using TommyRoom.Api.Helpers;
 using TommyRoom.Shared.DTOs;
 using TommyRoom.Shared.Entities;
-using TommyRoom.Shared.Enums;
 
 namespace TommyRoom.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountsController(DataContext datacontext, IUserHelper userHelper, IConfiguration configuration, IFileStorage fileStorage) : ControllerBase
+public class AccountsController(RoomDataContext datacontext, IUserHelper userHelper, IConfiguration configuration, IFileStorage fileStorage) : ControllerBase
 {
-    private readonly DataContext _dataContext = datacontext;
+    private readonly RoomDataContext _dataContext = datacontext;
     private readonly IUserHelper _userHelper = userHelper;
     private readonly IConfiguration _configuration = configuration;
     private readonly IFileStorage _fileStorage = fileStorage;
