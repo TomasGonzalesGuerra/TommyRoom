@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36121.58
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.12021.73 stable
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TommyRoom.Shared", "TommyRoom.Shared\TommyRoom.Shared.csproj", "{900F9ECA-1101-483F-95F4-D35220FB7A9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TommyRoom.Web", "TommyRoom.Web\TommyRoom.Web.csproj", "{74091435-B810-475B-8A1B-63B134668E74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TommyRoom.Api", "TommyRoom.Api\TommyRoom.Api.csproj", "{B6D8F022-C6D7-4118-92B4-835E226CE450}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TommyRoom.Shared", "TommyRoom.Shared\TommyRoom.Shared.csproj", "{8F1FFD9A-194F-42FF-8D7A-E81BB766AA08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TommyRoom.FrontEnd", "TommyRoom.FrontEnd\TommyRoom.FrontEnd.csproj", "{C66E98F0-A8F0-49BB-8368-165D8C997B27}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TommyRoom.Api", "TommyRoom.Api\TommyRoom.Api.csproj", "{4FF40ADC-471D-4994-83D7-BB4AFF62B2A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{900F9ECA-1101-483F-95F4-D35220FB7A9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{900F9ECA-1101-483F-95F4-D35220FB7A9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{900F9ECA-1101-483F-95F4-D35220FB7A9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{900F9ECA-1101-483F-95F4-D35220FB7A9A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6D8F022-C6D7-4118-92B4-835E226CE450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6D8F022-C6D7-4118-92B4-835E226CE450}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6D8F022-C6D7-4118-92B4-835E226CE450}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6D8F022-C6D7-4118-92B4-835E226CE450}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C66E98F0-A8F0-49BB-8368-165D8C997B27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C66E98F0-A8F0-49BB-8368-165D8C997B27}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C66E98F0-A8F0-49BB-8368-165D8C997B27}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C66E98F0-A8F0-49BB-8368-165D8C997B27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74091435-B810-475B-8A1B-63B134668E74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74091435-B810-475B-8A1B-63B134668E74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74091435-B810-475B-8A1B-63B134668E74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74091435-B810-475B-8A1B-63B134668E74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F1FFD9A-194F-42FF-8D7A-E81BB766AA08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F1FFD9A-194F-42FF-8D7A-E81BB766AA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F1FFD9A-194F-42FF-8D7A-E81BB766AA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F1FFD9A-194F-42FF-8D7A-E81BB766AA08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FF40ADC-471D-4994-83D7-BB4AFF62B2A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FF40ADC-471D-4994-83D7-BB4AFF62B2A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FF40ADC-471D-4994-83D7-BB4AFF62B2A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FF40ADC-471D-4994-83D7-BB4AFF62B2A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,8 +2,5 @@
 
 public enum UserType
 {
-    SuperAdmin,
-    Guest,
-    Receptionist,
-    User
+    Admin, Supervisor, Operator, Driver, Client
 }
